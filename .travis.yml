@@ -1,0 +1,22 @@
+language: node_js
+notifications:
+  email: false
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+(-(alpha|beta)\.\d+(@(alpha|beta))?)?$/
+before_script:
+  - npm run build
+#  - npm ls >/dev/null
+after_success: 
+  - 'npm run coverage:report'
+  - 'npm run build; ls ./build; surge --project ./build --domain atomic-stories.surge.sh; surge --project ./storybook-static --domain storybook-atomic-stories.surge.sh'
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: npx semantic-release
+    'on':
+      all_branches: true
+env:
+  global:
+    - FORCE_COLOR=1
+    - NPM_CONFIG_COLOR=always

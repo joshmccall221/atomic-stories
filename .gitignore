@@ -1,0 +1,40 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+/storybook-static
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+corber/tmp-livereload
+corber/cordova/node_modules
+corber/cordova/package.json
+corber/cordova/package-lock.json
+corber/cordova/platforms/*
+!corber/cordova/platforms/.gitkeep
+corber/cordova/plugins/*
+!corber/cordova/plugins/.gitkeep
+corber/cordova/www/*
+!corber/cordova/www/.gitkeep
+/node_modules/
+/lib/
+/coverage/
+/.nyc_output/
+
+.eslintcache
