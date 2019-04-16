@@ -8,6 +8,7 @@ import { Shadow, Layout } from './TableView';
 export type PersonListProps = { personList: PersonProps[]; };
 export type PersonProps = { person?: IPersonaSharedProps; };
 export type FindYourContactProps = {
+    delayResults: boolean;
     contactList: PersonProps[];
     settingsOnclick: () => void;
 } & PersonProps & IPeoplePickerExampleProps & any;
@@ -36,14 +37,9 @@ export default class extends BaseComponent<FindYourContactProps> {
     });
     render() {
         console.log('FindYourContacts', { ...this.props })
-        const { currentSelectedItems, mostRecentlyUsed, peopleList, contactList, settingsOnclick } = this.props
+        const { currentSelectedItems, mostRecentlyUsed, peopleList, contactList, settingsOnclick, setStateHandler } = this.props
         return (
             <>
-                < ContactPicker
-                    peopleList={peopleList}
-                    mostRecentlyUsed={mostRecentlyUsed}
-                    currentSelectedItems={currentSelectedItems}
-                />
 
                 <Layout title={'Search Contacts'} >
                     <Shadow
@@ -55,6 +51,8 @@ export default class extends BaseComponent<FindYourContactProps> {
                                         peopleList={peopleList}
                                         mostRecentlyUsed={mostRecentlyUsed}
                                         currentSelectedItems={currentSelectedItems}
+                                        setStateHandler={setStateHandler}
+                                        {...this.props}
                                     />
 
                             },

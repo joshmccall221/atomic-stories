@@ -2,15 +2,16 @@ import React, {Component} from 'react';
 import './App.css';
 import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
-import {adalApiFetch} from './adalConfig';
+import {authContext, adalApiFetch} from './adalConfig';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      delayResults: true,
       peopleList: [],
-      currentSlectedItems: [],
       mostRecentlyUsed: [],
+      currentSelectedItems: [],
       contactList: []
     };
     this.setThings = this.setThings.bind(this);
@@ -22,15 +23,13 @@ class App extends Component {
     this.getStuff();
   }
   getStuff() {
-    adalApiFetch(
-      axios,
-      window.location.hostname
-        ? 'https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net/api/search/users/josh'
-        : 'https://fyc-dev.azurewebsites.net/api/search/users/josh',
-      {method: 'GET'}
-    )
+    console.log({authContext});
+
+    adalApiFetch(axios, `${endpointBaseUrl}${endpoints.searchLegalContact}${authContext._user.userName}`, enpointConfig)
       .then(function(response) {
-        const people = response.data.map(m => ({
+        console.log({response});
+
+        const people = [response.data].map(m => ({
           ...m,
           text: m.displayname,
           secondaryText: m.jobtitle,
@@ -48,20 +47,24 @@ class App extends Component {
         console.log({people});
       })
       .catch(function(error) {
-        console.log(error);
+        console.log({error});
       });
   }
   render() {
     const {peopleList, currentSlectedItems, mostRecentlyUsed, contactList} = this.state;
-    return (
-      <FindYourContact
-        peopleList={peopleList}
-        currentSlectedItems={currentSlectedItems}
-        mostRecentlyUsed={mostRecentlyUsed}
-        contactList={contactList}
-      />
-    );
+    return <FindYourContact {...this.state} setStateHandler={this.setThings} />;
   }
 }
 
 export default App;
+
+export const endpoints = {
+  searchLegalContact: '/api/Search/Contacts/Legal/'
+};
+
+export const endpointBaseUrl =
+  window.location.hostname == 'localhost'
+    ? `https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net`
+    : `https://fyc-dev.azurewebsites.net`;
+
+export const enpointConfig = {method: 'GET'};

@@ -4,7 +4,7 @@ import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 initializeIcons();
 
 export interface IPeoplePickerExampleState {
-    delayResults?: boolean;
+    delayResults: boolean;
     peopleList: IPersonaProps[];
     mostRecentlyUsed: IPersonaProps[];
     currentSelectedItems: IPersonaProps[];
@@ -27,28 +27,20 @@ const suggestionProps: IBasePickerSuggestionsProps = {
 
 
 
-export default class extends React.Component<IPeoplePickerExampleProps, IPeoplePickerExampleState> {
+export default class extends React.Component<IPeoplePickerExampleProps & { setStateHandler: () => undefined; }
+    & IPeoplePickerExampleState & any> {
     // All pickers extend from BasePicker specifying the item type.
     private _picker = React.createRef<IBasePicker<IPersonaProps>>();
 
-    constructor(props: IPeoplePickerExampleProps) {
-        super(props);
-        this.state = {
-            delayResults: !this.props.peopleList.length,
-            peopleList: this.props.peopleList,
-            mostRecentlyUsed: this.props.mostRecentlyUsed,
-            currentSelectedItems: this.props.currentSelectedItems,
-        };
-    }
 
     public render() {
         console.log('ContactPicker', { ...this.props })
         return (
             <>
                 <CompactPeoplePicker
-                    selectedItems={this.state.currentSelectedItems}
+                    selectedItems={this.props.currentSelectedItems}
                     onItemSelected={(selectedItem?: IPersonaProps | undefined) => {
-                        selectedItem && this.setState({ currentSelectedItems: [selectedItem] })
+                        selectedItem && this.props.setStateHandler({ currentSelectedItems: [selectedItem] })
                         return selectedItem ? selectedItem : null
                     }}
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {
@@ -59,7 +51,7 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
                             }}
                             index={props.index}
                             onRemoveItem={() => {
-                                this.setState({ currentSelectedItems: [] })
+                                this.props.setStateHandler({ currentSelectedItems: [] })
                                 console.log('onRemoveItem')
 
                             }}
@@ -71,7 +63,7 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
                     onEmptyInputFocus={this._returnMostRecentlyUsed}
                     getTextFromItem={this._getTextFromItem}
                     className={'ms-PeoplePicker'}
-                    defaultSelectedItems={this.state.currentSelectedItems}
+                    defaultSelectedItems={this.props.currentSelectedItems}
                     key={'list'}
                     pickerSuggestionsProps={suggestionProps}
                     onRemoveSuggestion={this._onRemoveSuggestion}
@@ -79,15 +71,15 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
                     inputProps={{
                         onBlur: () => console.log('onBlur called'),
                         onFocus: () => {
-                            console.log('onFocus called', this.state.currentSelectedItems)
-                            if (this.state.currentSelectedItems) {
-                                this.setState({ currentSelectedItems: [] })
+                            console.log('onFocus called', { ...this.props })
+                            if (this.props.currentSelectedItems) {
+                                this.props.setStateHandler({ currentSelectedItems: [] })
                             }
                         },
                         'aria-label': 'People Picker'
                     }}
                     componentRef={this._picker}
-                    resolveDelay={300}
+                    // resolveDelay={300}
                     styles={{
                         root: {
                             display: 'inline-block',
@@ -126,7 +118,7 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
 
 
     private _onRemoveSuggestion = (item: IPersonaProps): void => {
-        const { peopleList, mostRecentlyUsed: mruState } = this.state;
+        const { peopleList, mostRecentlyUsed: mruState } = this.props;
         if (peopleList && mruState) {
 
             const indexPeopleList: number = peopleList.indexOf(item);
@@ -134,14 +126,14 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
 
             if (indexPeopleList >= 0) {
                 const newPeople: IPersonaProps[] = peopleList.slice(0, indexPeopleList).concat(peopleList.slice(indexPeopleList + 1));
-                this.setState({ peopleList: newPeople });
+                this.props.setStateHandler({ peopleList: newPeople });
             }
 
             if (indexMostRecentlyUsed >= 0) {
                 const newSuggestedPeople: IPersonaProps[] = mruState
                     .slice(0, indexMostRecentlyUsed)
                     .concat(mruState.slice(indexMostRecentlyUsed + 1));
-                this.setState({ mostRecentlyUsed: newSuggestedPeople });
+                this.props.setStateHandler({ mostRecentlyUsed: newSuggestedPeople });
             }
         }
     };
@@ -165,7 +157,7 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
     };
 
     private _returnMostRecentlyUsed = (currentPersonas?: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> => {
-        let { mostRecentlyUsed } = this.state;
+        let { mostRecentlyUsed } = this.props;
         if (currentPersonas && mostRecentlyUsed) {
             mostRecentlyUsed = this._removeDuplicates(mostRecentlyUsed, currentPersonas);
             return this._filterPromise(mostRecentlyUsed);
@@ -176,7 +168,7 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
 
 
     private _filterPromise(personasToReturn: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> {
-        if (this.state.delayResults) {
+        if (this.props.delayResults) {
             return this._convertResultsToPromise(personasToReturn);
         } else {
             return personasToReturn;
@@ -191,8 +183,8 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
     }
 
     private _filterPersonasByText(filterText: string): IPersonaProps[] {
-        const { peopleList } = this.state;
-        return peopleList && peopleList.filter(item => this._doesTextStartWith(item.text as string, filterText)) || []
+        const { peopleList } = this.props;
+        return peopleList && peopleList.filter((item: { text: string; }) => this._doesTextStartWith(item.text as string, filterText)) || []
     }
 
     private _doesTextStartWith(text: string, filterText: string): boolean {
@@ -208,11 +200,11 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
     }
 
     // private _toggleDelayResultsChange = (ev: React.MouseEvent<HTMLElement>, toggleState: boolean): void => {
-    //     this.setState({ delayResults: toggleState });
+    //     this.props.setStateHandler({ delayResults: toggleState });
     // };
 
     // private _dropDownSelected = (event: React.FormEvent<HTMLDivElement>, option: IDropdownOption): void => {
-    //     this.setState({ currentPicker: option.key });
+    //     this.props.setStateHandler({ currentPicker: option.key });
     // };
 
     private _validateInput = (input: string): ValidationState => {
