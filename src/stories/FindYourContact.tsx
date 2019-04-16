@@ -35,21 +35,28 @@ export default class extends BaseComponent<FindYourContactProps> {
         ...optStyles
     });
     render() {
-        console.log({ ...this.props })
+        console.log('FindYourContacts', { ...this.props })
         const { currentSelectedItems, mostRecentlyUsed, peopleList, contactList, settingsOnclick } = this.props
         return (
             <>
+                < ContactPicker
+                    peopleList={peopleList}
+                    mostRecentlyUsed={mostRecentlyUsed}
+                    currentSelectedItems={currentSelectedItems}
+                />
+
                 <Layout title={'Search Contacts'} >
                     <Shadow
                         childrenComponents={[
                             {
                                 type: 'SHADOW',
                                 component:
-                                    <ContactPicker
+                                    < ContactPicker
                                         peopleList={peopleList}
                                         mostRecentlyUsed={mostRecentlyUsed}
                                         currentSelectedItems={currentSelectedItems}
                                     />
+
                             },
                             {
                                 type: 'DOUBLE_SHADOW',

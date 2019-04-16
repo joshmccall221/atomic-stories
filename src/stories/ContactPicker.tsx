@@ -42,6 +42,7 @@ export default class extends React.Component<IPeoplePickerExampleProps, IPeopleP
     }
 
     public render() {
+        console.log('ContactPicker', { ...this.props })
         return (
             <>
                 <CompactPeoplePicker
