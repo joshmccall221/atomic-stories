@@ -3,6 +3,7 @@ import './App.css';
 import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
 import {authContext, adalApiFetch} from './adalConfig';
+import {async} from 'q';
 
 class App extends Component {
   constructor(props) {
@@ -27,10 +28,35 @@ class App extends Component {
     };
     this.setThings = this.setThings.bind(this);
     this._isMounted = false;
-    this.apiSearchContactsLegal(authContext._user.userName);
+    const legalStuff = async () =>
+      await this.apiSearchContactsLegal(authContext._user.userName)
+        .then(function(response) {
+          console.log('constructor.then ===========', {response});
+          console.log('apiSearchContactsLegal', {response});
+          const people = [response.data].map(m => ({
+            ...m,
+            text: m.displayname,
+            secondaryText: m.jobtitle,
+            imageUrl: m.picture
+          }));
+          return people;
+        })
+        .then(people => {
+          console.log('=======thenPeople', {people});
+          this.setThings({
+            // peopleList: people,
+            // currentSelectedItems: people,
+            // mostRecentlyUsed: people,
+            contactList: people
+          });
+          return people;
+        })
+        .catch(function(error) {
+          console.log({error});
+        });
     this.apiSearchUsers(authContext._user.profile.name, true);
 
-    console.log({authContext});
+    legalStuff().then(r => console.log('constructor ===========', {authContext, r}));
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -41,8 +67,8 @@ class App extends Component {
   setThings(state) {
     this._isMounted && this.setState(state);
   }
-  apiSearchUsers(contact, setCurrentSelectedItems) {
-    adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
+  async apiSearchUsers(contact, setCurrentSelectedItems) {
+    await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
       .then(function(response) {
         console.log('apiSearchUsers', {response});
         const people = response.data.map(m => ({
@@ -84,31 +110,9 @@ class App extends Component {
         console.log({error});
       });
   }
-  apiSearchContactsLegal(contact) {
+  async apiSearchContactsLegal(contact) {
     console.log('apiSearchContactsLegal', {contact});
-    adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`, enpointConfig)
-      .then(function(response) {
-        console.log('apiSearchContactsLegal', {response});
-        const people = [response.data].map(m => ({
-          ...m,
-          text: m.displayname,
-          secondaryText: m.jobtitle,
-          imageUrl: m.picture
-        }));
-        return people;
-      })
-      .then(people => {
-        this.setThings({
-          // peopleList: people,
-          // currentSelectedItems: people,
-          // mostRecentlyUsed: people,
-          contactList: people
-        });
-        console.log({people});
-      })
-      .catch(function(error) {
-        console.log({error});
-      });
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`, enpointConfig);
   }
   render() {
     const {route} = this.state;
