@@ -40,7 +40,10 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                 <CompactPeoplePicker
                     selectedItems={this.props.currentSelectedItems}
                     onItemSelected={(selectedItem?: IPersonaProps | undefined) => {
+
+                        console.log('=======onItemSelected', { selectedItem })
                         selectedItem && this.props.setStateHandler({ currentSelectedItems: [selectedItem] })
+                        selectedItem && this.props.apiSearchContactsLegal((selectedItem as any).mail)
                         return selectedItem ? selectedItem : null
                     }}
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {

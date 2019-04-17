@@ -115,6 +115,7 @@ class App extends Component {
                 {...this.state}
                 setStateHandler={this.setThings}
                 apiSearchUsers={this.apiSearchUsers.bind(this)}
+                apiSearchContactsLegal={this.apiSearchContactsLegal.bind(this)}
               />
             )
           }[route]
