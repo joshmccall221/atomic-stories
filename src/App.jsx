@@ -3,7 +3,6 @@ import './App.css';
 import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
 import {authContext, adalApiFetch} from './adalConfig';
-import {async} from 'q';
 
 class App extends Component {
   constructor(props) {
@@ -28,35 +27,48 @@ class App extends Component {
     };
     this.setThings = this.setThings.bind(this);
     this._isMounted = false;
-    const legalStuff = async () =>
-      await this.apiSearchContactsLegal(authContext._user.userName)
-        .then(function(response) {
-          console.log('constructor.then ===========', {response});
-          console.log('apiSearchContactsLegal', {response});
-          const people = [response.data].map(m => ({
-            ...m,
-            text: m.displayname,
-            secondaryText: m.jobtitle,
-            imageUrl: m.picture
-          }));
-          return people;
-        })
-        .then(people => {
-          console.log('=======thenPeople', {people});
-          this.setThings({
-            // peopleList: people,
-            // currentSelectedItems: people,
-            // mostRecentlyUsed: people,
-            contactList: people
-          });
-          return people;
-        })
-        .catch(function(error) {
-          console.log({error});
+    this.apiSearchContactsLegal(authContext._user.userName)
+      .then(people => {
+        console.log('=======thenPeople', {people});
+        this.setThings({
+          // peopleList: people,
+          // currentSelectedItems: people,
+          // mostRecentlyUsed: people,
+          contactList: people
         });
-    this.apiSearchUsers(authContext._user.profile.name, true);
+        return people;
+      })
+      .catch(function(error) {
+        console.log({error});
+      });
+    this.apiSearchUsers(authContext._user.profile.name, true).then(people => {
+      console.log('people', {people});
+      const uniquePeople = people.map(m => {
+        return {[m.mail]: m};
+      });
+      const peopleList = Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
+        console.log({m});
+        // Object.keys({'a': {'a':'b'}})[0]
+        return m[Object.keys(m)[0]];
+      });
+      console.log('============people', {people, uniquePeople});
+      this.setThings({
+        // peopleList: [...people]
+        peopleListObject: {...this.state.peopleListObject, ...uniquePeople},
+        peopleList,
+        mostRecentlyUsed: peopleList
+      });
+      this.setThings({
+        currentSelectedItems: Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
+          console.log('setCurrentSelectedItems', {m});
+          // Object.keys({'a': {'a':'b'}})[0]
+          return m[Object.keys(m)[0]];
+        })
+      });
+      console.log('apiSearchUsers', {people});
+    });
 
-    legalStuff().then(r => console.log('constructor ===========', {authContext, r}));
+    // legalStuff().then(r => console.log('constructor ===========', {authContext, r}));
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -68,7 +80,7 @@ class App extends Component {
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact, setCurrentSelectedItems) {
-    await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
       .then(function(response) {
         console.log('apiSearchUsers', {response});
         const people = response.data.map(m => ({
@@ -79,40 +91,27 @@ class App extends Component {
         }));
         return people;
       })
-      .then(people => {
-        console.log('people', {people});
-        const uniquePeople = people.map(m => {
-          return {[m.mail]: m};
-        });
-        const peopleList = Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
-          console.log({m});
-          // Object.keys({'a': {'a':'b'}})[0]
-          return m[Object.keys(m)[0]];
-        });
-        console.log('============people', {people, uniquePeople});
-        this.setThings({
-          // peopleList: [...people]
-          peopleListObject: {...this.state.peopleListObject, ...uniquePeople},
-          peopleList,
-          mostRecentlyUsed: peopleList
-        });
-        setCurrentSelectedItems &&
-          this.setThings({
-            currentSelectedItems: Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
-              console.log('setCurrentSelectedItems', {m});
-              // Object.keys({'a': {'a':'b'}})[0]
-              return m[Object.keys(m)[0]];
-            })
-          });
-        console.log('apiSearchUsers', {people});
-      })
       .catch(function(error) {
         console.log({error});
       });
   }
+
   async apiSearchContactsLegal(contact) {
     console.log('apiSearchContactsLegal', {contact});
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`, enpointConfig);
+    return await adalApiFetch(
+      axios,
+      `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`,
+      enpointConfig
+    ).then(function(response) {
+      console.log('apiSearchUsers', {response});
+      const people = [response.data].map(m => ({
+        ...m,
+        text: m.displayname,
+        secondaryText: m.jobtitle,
+        imageUrl: m.picture
+      }));
+      return people;
+    });
   }
   render() {
     const {route} = this.state;
