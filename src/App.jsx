@@ -28,7 +28,8 @@ class App extends Component {
     this.setThings = this.setThings.bind(this);
     this._isMounted = false;
     this.apiSearchContactsLegal(authContext._user.userName);
-    this.apiSearchUsers(authContext._user.profile.name);
+    this.apiSearchUsers(authContext._user.profile.name, true);
+
     console.log({authContext});
   }
   componentWillUnmount() {
@@ -40,7 +41,7 @@ class App extends Component {
   setThings(state) {
     this._isMounted && this.setState(state);
   }
-  apiSearchUsers(contact) {
+  apiSearchUsers(contact, setCurrentSelectedItems) {
     adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
       .then(function(response) {
         console.log('apiSearchUsers', {response});
@@ -55,24 +56,28 @@ class App extends Component {
       .then(people => {
         console.log('people', {people});
         const uniquePeople = people.map(m => {
-          return {[m.id]: m};
+          return {[m.mail]: m};
+        });
+        const peopleList = Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
+          console.log({m});
+          // Object.keys({'a': {'a':'b'}})[0]
+          return m[Object.keys(m)[0]];
         });
         console.log('============people', {people, uniquePeople});
         this.setThings({
           // peopleList: [...people]
           peopleListObject: {...this.state.peopleListObject, ...uniquePeople},
-          // peopleList: Object.keys({...this.state.peopleListObject, ...uniquePeople}).map(m => {
-          //   return m;
-          // })
-          // peopleList: Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
-          //   console.log({m});
-          //   return m[Object.keys(m)[0].id];
-          // })
-          peopleList: [...people, ...this.state.peopleList]
-          // mostRecentlyUsed: people
-          // currentSelectedItems: people
-          // peopleList: people
+          peopleList,
+          mostRecentlyUsed: peopleList
         });
+        setCurrentSelectedItems &&
+          this.setThings({
+            currentSelectedItems: Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
+              console.log('setCurrentSelectedItems', {m});
+              // Object.keys({'a': {'a':'b'}})[0]
+              return m[Object.keys(m)[0]];
+            })
+          });
         console.log('apiSearchUsers', {people});
       })
       .catch(function(error) {
@@ -80,6 +85,7 @@ class App extends Component {
       });
   }
   apiSearchContactsLegal(contact) {
+    console.log('apiSearchContactsLegal', {contact});
     adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`, enpointConfig)
       .then(function(response) {
         console.log('apiSearchContactsLegal', {response});
@@ -93,9 +99,9 @@ class App extends Component {
       })
       .then(people => {
         this.setThings({
-          peopleList: people,
-          currentSlectedItems: people,
-          mostRecentlyUsed: people,
+          // peopleList: people,
+          // currentSelectedItems: people,
+          // mostRecentlyUsed: people,
           contactList: people
         });
         console.log({people});
