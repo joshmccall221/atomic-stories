@@ -44,6 +44,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                         return selectedItem ? selectedItem : null
                     }}
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {
+                        debugger;
                         return <PeoplePickerItem
                             item={{
                                 ...props.item,
@@ -69,6 +70,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                     onRemoveSuggestion={this._onRemoveSuggestion}
                     onValidateInput={this._validateInput}
                     inputProps={{
+                        onChange: (props) => console.log('onChange', { props }),
                         onBlur: () => console.log('onBlur called'),
                         onFocus: () => {
                             console.log('onFocus called', { ...this.props })
@@ -79,7 +81,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                         'aria-label': 'People Picker'
                     }}
                     componentRef={this._picker}
-                    // resolveDelay={300}
+                    resolveDelay={300}
                     styles={{
                         root: {
                             display: 'inline-block',
@@ -144,16 +146,19 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
         filterText: string,
         currentPersonas?: IPersonaProps[],
     ): IPersonaProps[] | Promise<IPersonaProps[]> => {
-        if (filterText) {
-            let filteredPersonas: IPersonaProps[] = this._filterPersonasByText(filterText);
-            if (currentPersonas) {
-                filteredPersonas = this._removeDuplicates(filteredPersonas, currentPersonas);
-            }
-            // filteredPersonas = limitResults ? filteredPersonas.splice(0, limitResults) : filteredPersonas;
-            return this._filterPromise(filteredPersonas);
-        } else {
-            return [];
-        }
+        console.log("_onFilterChanged", { filterText, currentPersonas })
+        this.props.apiSearchUsers(filterText)
+        // if (filterText) {
+        //     let filteredPersonas: IPersonaProps[] = this._filterPersonasByText(filterText);
+        //     if (currentPersonas) {
+        //         filteredPersonas = this._removeDuplicates(filteredPersonas, currentPersonas);
+        //     }
+        //     // filteredPersonas = limitResults ? filteredPersonas.splice(0, limitResults) : filteredPersonas;
+        //     return this._filterPromise(filteredPersonas);
+        // } else {
+        //     return [];
+        // }
+        return this.props.peopleList
     };
 
     private _returnMostRecentlyUsed = (currentPersonas?: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> => {
@@ -182,14 +187,14 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
         return personas.filter(item => item.text === persona.text).length > 0;
     }
 
-    private _filterPersonasByText(filterText: string): IPersonaProps[] {
-        const { peopleList } = this.props;
-        return peopleList && peopleList.filter((item: { text: string; }) => this._doesTextStartWith(item.text as string, filterText)) || []
-    }
+    // private _filterPersonasByText(filterText: string): IPersonaProps[] {
+    //     const { peopleList } = this.props;
+    //     return peopleList && peopleList.filter((item: { text: string; }) => this._doesTextStartWith(item.text as string, filterText)) || []
+    // }
 
-    private _doesTextStartWith(text: string, filterText: string): boolean {
-        return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
-    }
+    // private _doesTextStartWith(text: string, filterText: string): boolean {
+    //     return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
+    // }
 
     private _convertResultsToPromise(results: IPersonaProps[]): Promise<IPersonaProps[]> {
         return new Promise<IPersonaProps[]>((resolve) => setTimeout(() => resolve(results), 2000));

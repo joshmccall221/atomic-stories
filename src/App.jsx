@@ -15,17 +15,54 @@ class App extends Component {
       contactList: []
     };
     this.setThings = this.setThings.bind(this);
+    this._isMounted = false;
   }
-  setThings(state) {
-    this.setState(state);
+  componentWillUnmount() {
+    this._isMounted = false;
   }
   componentDidMount() {
-    this.getStuff();
+    this._isMounted = true;
+  }
+  setThings(state) {
+    this._isMounted && this.setState(state);
+  }
+  componentWillMount() {
+    // this.getStuff();
+    this.apiSearchContactsLegal(authContext._user.userName);
   }
   getStuff() {
     console.log({authContext});
+  }
+  apiSearchUsers(contact) {
+    adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
+      .then(function(response) {
+        console.log({response});
 
-    adalApiFetch(axios, `${endpointBaseUrl}${endpoints.searchLegalContact}${authContext._user.userName}`, enpointConfig)
+        console.log('apiSearchUsers', {response});
+        const people = response.data.map(m => ({
+          ...m,
+          text: m.displayname,
+          secondaryText: m.jobtitle,
+          imageUrl: m.picture
+        }));
+        return people;
+      })
+      .then(people => {
+        this.setThings({
+          peopleList: [...people]
+          // peopleList: [...people, ...this.state.peopleList]
+          // mostRecentlyUsed: people
+          // currentSelectedItems: people
+          // peopleList: people
+        });
+        console.log('apiSearchUsers', {people});
+      })
+      .catch(function(error) {
+        console.log({error});
+      });
+  }
+  apiSearchContactsLegal(contact) {
+    adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`, enpointConfig)
       .then(function(response) {
         console.log({response});
 
@@ -52,14 +89,22 @@ class App extends Component {
   }
   render() {
     const {peopleList, currentSlectedItems, mostRecentlyUsed, contactList} = this.state;
-    return <FindYourContact {...this.state} setStateHandler={this.setThings} />;
+    return (
+      <FindYourContact
+        {...this.state}
+        setStateHandler={this.setThings}
+        apiSearchUsers={this.apiSearchUsers.bind(this)}
+      />
+    );
   }
 }
 
 export default App;
 
 export const endpoints = {
-  searchLegalContact: '/api/Search/Contacts/Legal/'
+  apiSearchContactsLegal: '/api/Search/Contacts/Legal/',
+  apiSearchContactsOSS: '/api/Search/Contacts/OSS/',
+  apiSearchUser: '/api/Search/Users/'
 };
 
 export const endpointBaseUrl =
