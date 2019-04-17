@@ -12,10 +12,24 @@ class App extends Component {
       peopleList: [],
       mostRecentlyUsed: [],
       currentSelectedItems: [],
-      contactList: []
+      contactList: [],
+      route: 'FindYourContact',
+      links: {
+        HOME: () => this.setState({route: 'FindYourContact'}),
+        ADD: () => this.setState({route: 'ADD'}),
+        OK: () => this.setState({route: 'OK'}),
+        TOOL_MANAGERS: () => this.setState({route: 'TOOLS_MANAGER'}),
+        GROUP_DETAILS: () => this.setState({route: 'GROUP_DETAILS'}),
+        EDIT: () => this.setState({route: 'EDIT'}),
+        DELETE: () => console.log('DELETE'),
+        SETTINGS: () => console.log('SETTINGS')
+      }
     };
     this.setThings = this.setThings.bind(this);
     this._isMounted = false;
+    this.apiSearchContactsLegal(authContext._user.userName);
+    this.apiSearchUsers(authContext._user.profile.name);
+    console.log({authContext});
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -26,18 +40,9 @@ class App extends Component {
   setThings(state) {
     this._isMounted && this.setState(state);
   }
-  componentWillMount() {
-    // this.getStuff();
-    this.apiSearchContactsLegal(authContext._user.userName);
-  }
-  getStuff() {
-    console.log({authContext});
-  }
   apiSearchUsers(contact) {
     adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
       .then(function(response) {
-        console.log({response});
-
         console.log('apiSearchUsers', {response});
         const people = response.data.map(m => ({
           ...m,
@@ -48,9 +53,22 @@ class App extends Component {
         return people;
       })
       .then(people => {
+        console.log('people', {people});
+        const uniquePeople = people.map(m => {
+          return {[m.id]: m};
+        });
+        console.log('============people', {people, uniquePeople});
         this.setThings({
-          peopleList: [...people]
-          // peopleList: [...people, ...this.state.peopleList]
+          // peopleList: [...people]
+          peopleListObject: {...this.state.peopleListObject, ...uniquePeople},
+          // peopleList: Object.keys({...this.state.peopleListObject, ...uniquePeople}).map(m => {
+          //   return m;
+          // })
+          // peopleList: Object.values({...this.state.peopleListObject, ...uniquePeople}).map(m => {
+          //   console.log({m});
+          //   return m[Object.keys(m)[0].id];
+          // })
+          peopleList: [...people, ...this.state.peopleList]
           // mostRecentlyUsed: people
           // currentSelectedItems: people
           // peopleList: people
@@ -64,8 +82,7 @@ class App extends Component {
   apiSearchContactsLegal(contact) {
     adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`, enpointConfig)
       .then(function(response) {
-        console.log({response});
-
+        console.log('apiSearchContactsLegal', {response});
         const people = [response.data].map(m => ({
           ...m,
           text: m.displayname,
@@ -88,13 +105,21 @@ class App extends Component {
       });
   }
   render() {
-    const {peopleList, currentSlectedItems, mostRecentlyUsed, contactList} = this.state;
+    const {route} = this.state;
     return (
-      <FindYourContact
-        {...this.state}
-        setStateHandler={this.setThings}
-        apiSearchUsers={this.apiSearchUsers.bind(this)}
-      />
+      <>
+        {
+          {
+            FindYourContact: (
+              <FindYourContact
+                {...this.state}
+                setStateHandler={this.setThings}
+                apiSearchUsers={this.apiSearchUsers.bind(this)}
+              />
+            )
+          }[route]
+        }
+      </>
     );
   }
 }
@@ -108,7 +133,7 @@ export const endpoints = {
 };
 
 export const endpointBaseUrl =
-  window.location.hostname == 'localhost'
+  window.location.hostname === 'localhost'
     ? `https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net`
     : `https://fyc-dev.azurewebsites.net`;
 

@@ -67,7 +67,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                     defaultSelectedItems={this.props.currentSelectedItems}
                     key={'list'}
                     pickerSuggestionsProps={suggestionProps}
-                    onRemoveSuggestion={this._onRemoveSuggestion}
+                    // onRemoveSuggestion={this._onRemoveSuggestion}
                     onValidateInput={this._validateInput}
                     inputProps={{
                         onChange: (props) => console.log('onChange', { props }),
@@ -119,26 +119,26 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
 
 
 
-    private _onRemoveSuggestion = (item: IPersonaProps): void => {
-        const { peopleList, mostRecentlyUsed: mruState } = this.props;
-        if (peopleList && mruState) {
+    // private _onRemoveSuggestion = (item: IPersonaProps): void => {
+    //     const { peopleList, mostRecentlyUsed: mruState } = this.props;
+    //     if (peopleList && mruState) {
 
-            const indexPeopleList: number = peopleList.indexOf(item);
-            const indexMostRecentlyUsed: number = mruState.indexOf(item);
+    //         const indexPeopleList: number = peopleList.indexOf(item);
+    //         const indexMostRecentlyUsed: number = mruState.indexOf(item);
 
-            if (indexPeopleList >= 0) {
-                const newPeople: IPersonaProps[] = peopleList.slice(0, indexPeopleList).concat(peopleList.slice(indexPeopleList + 1));
-                this.props.setStateHandler({ peopleList: newPeople });
-            }
+    //         if (indexPeopleList >= 0) {
+    //             const newPeople: IPersonaProps[] = peopleList.slice(0, indexPeopleList).concat(peopleList.slice(indexPeopleList + 1));
+    //             this.props.setStateHandler({ peopleList: newPeople });
+    //         }
 
-            if (indexMostRecentlyUsed >= 0) {
-                const newSuggestedPeople: IPersonaProps[] = mruState
-                    .slice(0, indexMostRecentlyUsed)
-                    .concat(mruState.slice(indexMostRecentlyUsed + 1));
-                this.props.setStateHandler({ mostRecentlyUsed: newSuggestedPeople });
-            }
-        }
-    };
+    //         if (indexMostRecentlyUsed >= 0) {
+    //             const newSuggestedPeople: IPersonaProps[] = mruState
+    //                 .slice(0, indexMostRecentlyUsed)
+    //                 .concat(mruState.slice(indexMostRecentlyUsed + 1));
+    //             this.props.setStateHandler({ mostRecentlyUsed: newSuggestedPeople });
+    //         }
+    //     }
+    // };
 
     // (filter: string, selectedItems?: IPersonaProps[] | undefined)
     // IPersonaProps[] | PromiseLike<IPersonaProps[]>
