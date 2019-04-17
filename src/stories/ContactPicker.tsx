@@ -43,7 +43,11 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
 
                         console.log('=======onItemSelected', { selectedItem })
                         selectedItem && this.props.setStateHandler({ currentSelectedItems: [selectedItem] })
-                        selectedItem && this.props.apiSearchContactsLegal((selectedItem as any)['mail'])
+                        selectedItem && this.props.apiSearchContactsLegal((selectedItem as any)['mail']).then((r: any) => {
+
+                            this.props.setStateHandler({ contactList: r })
+
+                        })
                         return selectedItem ? selectedItem : null
                     }}
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {
@@ -149,15 +153,17 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
         filterText: string,
         currentPersonas?: IPersonaProps[],
     ): IPersonaProps[] | Promise<IPersonaProps[]> => {
-        console.log("_onFilterChanged", { filterText, currentPersonas })
-        this.props.apiSearchUsers(filterText)
+        console.log("_onFilterChanged", { filterText, props: this.props })
         if (filterText) {
-            let filteredPersonas: IPersonaProps[] = this._filterPersonasByText(filterText);
-            if (currentPersonas) {
-                filteredPersonas = this._removeDuplicates(filteredPersonas, currentPersonas);
-            }
-            // filteredPersonas = limitResults ? filteredPersonas.splice(0, limitResults) : filteredPersonas;
-            return this._filterPromise(filteredPersonas);
+            const results = this.props.apiSearchUsers(filterText)
+            console.log({ results })
+            return results;
+            // let filteredPersonas: IPersonaProps[] = this._filterPersonasByText(filterText);
+            // if (currentPersonas) {
+            //     filteredPersonas = this._removeDuplicates(filteredPersonas, currentPersonas);
+            // }
+            // // filteredPersonas = limitResults ? filteredPersonas.splice(0, limitResults) : filteredPersonas;
+            // return this._filterPromise(filteredPersonas);
         } else {
             return [];
         }
@@ -190,14 +196,14 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
         return personas.filter(item => item.text === persona.text).length > 0;
     }
 
-    private _filterPersonasByText(filterText: string): IPersonaProps[] {
-        const { peopleList } = this.props;
-        return peopleList && peopleList.filter((item: { text: string; }) => this._doesTextStartWith(item.text as string, filterText)) || []
-    }
+    // private _filterPersonasByText(filterText: string): IPersonaProps[] {
+    //     const { peopleList } = this.props;
+    //     return peopleList && peopleList.filter((item: { text: string; }) => this._doesTextStartWith(item.text as string, filterText)) || []
+    // }
 
-    private _doesTextStartWith(text: string, filterText: string): boolean {
-        return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
-    }
+    // private _doesTextStartWith(text: string, filterText: string): boolean {
+    //     return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
+    // }
 
     private _convertResultsToPromise(results: IPersonaProps[]): Promise<IPersonaProps[]> {
         return new Promise<IPersonaProps[]>((resolve) => setTimeout(() => resolve(results), 2000));
