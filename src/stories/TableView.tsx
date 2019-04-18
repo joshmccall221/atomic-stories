@@ -8,12 +8,16 @@ export class Shadow extends React.PureComponent<Props>{
     render() {
         const { childrenComponents, children, type, width } = this.props;
         const renderChildrenComponents = childrenComponents && childrenComponents.map((m: any) => {
-            console.log({ m })
             return ({
                 SHADOW: () =>
 
                     <div style={{ ...{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
-                        <div style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, width: width ? width : 260, ...{ margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
+                        <div style={{
+                            border: '1px solid #e5e5e5',
+                            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+                            padding: 20,
+                            width: width ? width : 260, ...{ margin: "auto", display: 'inline-block', textAlign: 'center' }
+                        }} >
                             {m.component}
                         </div>
                     </div>,
@@ -21,10 +25,9 @@ export class Shadow extends React.PureComponent<Props>{
                     <>
                         {/* {m.component} */}
                         {m.component.map((m: any) => {
-                            console.log("mmmmmm", { m })
                             return <>
-                                <div style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, margin: '2em', width: 260, display: 'inline-block', textAlign: 'center' }}>
-                                    <div style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', }}>
+                                <div style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, margin: '2em', width: 260, display: 'inline-block', textAlign: 'center' }}>
+                                    <div style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', }}>
                                         <div style={{ textAlign: 'center', paddingTop: 20 }}>
                                             {m}
                                         </div>
@@ -42,7 +45,6 @@ export class Shadow extends React.PureComponent<Props>{
                     </div>
             })[type || m.type]()
         })
-        console.log({ debugChild: renderChildrenComponents })
         return (
 
             <>
@@ -70,14 +72,12 @@ export class Layout extends React.PureComponent<Props>{
 export default class extends React.PureComponent<Props>{
     render() {
         const { contactList, links } = this.props;
-        console.log({ contactList })
         const actionOnclick = (actionType: string, row: any) => () => {
-            console.log(actionType, { row })
         }
         return (
             <Layout
 
-                title={'Search Contacts'}
+                title={'Group Details'}
                 children={
 
                     <Shadow
@@ -145,9 +145,7 @@ export default class extends React.PureComponent<Props>{
 export class ToolManagers extends React.PureComponent<Props>{
     render() {
         const { contactList, links } = this.props;
-        console.log({ contactList })
         const actionOnclick = (actionType: string, row: any) => () => {
-            console.log(actionType, { row })
         }
         return (
             <>

@@ -53,6 +53,12 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {
                         debugger;
                         return <PeoplePickerItem
+                            styles={{
+                                root: {
+                                    height: 28,
+                                    maxWidth: 200
+                                }
+                            }}
                             item={{
                                 ...props.item,
                                 ValidationState: ValidationState.valid
@@ -68,7 +74,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
 
                     itemLimit={1}
                     onResolveSuggestions={this._onFilterChanged}
-                    onEmptyInputFocus={this._returnMostRecentlyUsed}
+                    // onEmptyInputFocus={this._returnMostRecentlyUsed}
                     getTextFromItem={this._getTextFromItem}
                     className={'ms-PeoplePicker'}
                     defaultSelectedItems={this.props.currentSelectedItems}
@@ -170,31 +176,31 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
         return this.props.peopleList
     };
 
-    private _returnMostRecentlyUsed = (currentPersonas?: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> => {
-        let { mostRecentlyUsed } = this.props;
-        if (currentPersonas && mostRecentlyUsed) {
-            mostRecentlyUsed = this._removeDuplicates(mostRecentlyUsed, currentPersonas);
-            return this._filterPromise(mostRecentlyUsed);
-        }
-        return [];
-    };
+    // private _returnMostRecentlyUsed = (currentPersonas?: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> => {
+    //     let { mostRecentlyUsed } = this.props;
+    //     if (currentPersonas && mostRecentlyUsed) {
+    //         mostRecentlyUsed = this._removeDuplicates(mostRecentlyUsed, currentPersonas);
+    //         return this._filterPromise(mostRecentlyUsed);
+    //     }
+    //     return [];
+    // };
 
 
 
-    private _filterPromise(personasToReturn: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> {
-        if (this.props.delayResults) {
-            return this._convertResultsToPromise(personasToReturn);
-        } else {
-            return personasToReturn;
-        }
-    }
+    // private _filterPromise(personasToReturn: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> {
+    //     if (this.props.delayResults) {
+    //         return this._convertResultsToPromise(personasToReturn);
+    //     } else {
+    //         return personasToReturn;
+    //     }
+    // }
 
-    private _listContainsPersona(persona: IPersonaProps, personas: IPersonaProps[]) {
-        if (!personas || !personas.length || personas.length === 0) {
-            return false;
-        }
-        return personas.filter(item => item.text === persona.text).length > 0;
-    }
+    // private _listContainsPersona(persona: IPersonaProps, personas: IPersonaProps[]) {
+    //     if (!personas || !personas.length || personas.length === 0) {
+    //         return false;
+    //     }
+    //     return personas.filter(item => item.text === persona.text).length > 0;
+    // }
 
     // private _filterPersonasByText(filterText: string): IPersonaProps[] {
     //     const { peopleList } = this.props;
@@ -205,13 +211,13 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
     //     return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
     // }
 
-    private _convertResultsToPromise(results: IPersonaProps[]): Promise<IPersonaProps[]> {
-        return new Promise<IPersonaProps[]>((resolve) => setTimeout(() => resolve(results), 2000));
-    }
+    // private _convertResultsToPromise(results: IPersonaProps[]): Promise<IPersonaProps[]> {
+    //     return new Promise<IPersonaProps[]>((resolve) => setTimeout(() => resolve(results), 2000));
+    // }
 
-    private _removeDuplicates(personas: IPersonaProps[], possibleDupes: IPersonaProps[]) {
-        return personas.filter(persona => !this._listContainsPersona(persona, possibleDupes));
-    }
+    // private _removeDuplicates(personas: IPersonaProps[], possibleDupes: IPersonaProps[]) {
+    //     return personas.filter(persona => !this._listContainsPersona(persona, possibleDupes));
+    // }
 
     // private _toggleDelayResultsChange = (ev: React.MouseEvent<HTMLElement>, toggleState: boolean): void => {
     //     this.props.setStateHandler({ delayResults: toggleState });

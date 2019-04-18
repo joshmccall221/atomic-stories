@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { BaseComponent, IPersonaSharedProps, IconButton } from 'office-ui-fabric-react';
-import { PersonaBadge } from './Personas';
+import { BaseComponent, IPersonaSharedProps, IconButton, Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import ContactPicker, { IPeoplePickerExampleProps } from './ContactPicker';
 import { Shadow, Layout } from './TableView';
+import { PersonaBadge } from './Personas';
 
 
 export type PersonListProps = { personList: PersonProps[]; };
@@ -27,17 +27,17 @@ export default class extends BaseComponent<FindYourContactProps> {
     //     return <PersonaBadge />
 
     // }
-    getStyle = (optStyles: any) => ({
-        display: "inline-block",
-        margin: "auto",
-        marginTop: 50,
-        textAlign: "center",
-        width: "100%",
-        ...optStyles
-    });
+    // getStyle = (optStyles: any) => ({
+    //     display: "inline-block",
+    //     margin: "auto",
+    //     marginTop: 50,
+    //     textAlign: "center",
+    //     width: "100%",
+    //     ...optStyles
+    // });
     render() {
         console.log('FindYourContacts', { ...this.props })
-        const { currentSelectedItems, mostRecentlyUsed, peopleList, contactList, settingsOnclick, setStateHandler } = this.props
+        const { currentSelectedItems, mostRecentlyUsed, peopleList, setStateHandler, links } = this.props
         return (
             <>
 
@@ -57,14 +57,23 @@ export default class extends BaseComponent<FindYourContactProps> {
 
                             },
                             {
+                                type: 'NO_SHADOW',
+                                component: [
+                                    !this.props.contactList.length && <Spinner style={{ height: 335 }} size={SpinnerSize.large} />,
+                                ].filter(f => f)
+                                // component: !contactList.length  ? [<ShimmerLoadDataExample />] : contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
+                            },
+                            {
                                 type: 'DOUBLE_SHADOW',
-                                component:
-                                    contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
+                                component: [
+                                    this.props.contactList.length && this.props.contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
+                                ].filter(f => f)
+                                // component: !contactList.length  ? [<ShimmerLoadDataExample />] : contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
                             },
                             {
                                 type: 'FOOTER',
-                                component:
-                                    <IconButton
+                                component: [
+                                    this.props.isToolManager && <IconButton
                                         styles={{
                                             root: {
                                                 height: 32,
@@ -74,8 +83,12 @@ export default class extends BaseComponent<FindYourContactProps> {
                                         iconProps={{ iconName: 'settings' }}
                                         title="search"
                                         ariaLabel="search"
-                                        onClick={settingsOnclick}
+                                        onClick={() => {
+                                            console.log('settings onclick')
+                                            links.GROUP_DETAILS()
+                                        }}
                                     />
+                                ]
 
                             }
                         ]}
