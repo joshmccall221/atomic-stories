@@ -74,8 +74,12 @@ export default class extends React.PureComponent<Props>{
         const { contactList, links } = this.props;
         console.log('contact group', this.props)
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
-            console.log('actionOnclick', { actionType, row, id: row.id })
-            this.props.apiContactGroupsIDAlias({ id: row.id })
+            console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
+            this.props.setStateHandler({ contactGroupDetails: undefined })
+            return ({
+                VIEW: () => this.props.apiContactGroupsIDDisplayName({ id: row.id }),
+                EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id }),
+            })[actionType]();
         }
         return (
             <Layout
@@ -159,7 +163,7 @@ export default class extends React.PureComponent<Props>{
 export class ToolManagers extends React.PureComponent<Props>{
     render() {
         const { contactList, links } = this.props;
-        const actionOnclick = (actionType: string, row: any) => () => {
+        const actionOnclick = () => () => {
         }
         return (
             <>
@@ -287,7 +291,7 @@ export class ActionButtons extends React.PureComponent<Props>{
                     title="edit"
                     ariaLabel="edit"
                     onClick={() => {
-                        actionOnclick({ actionType: '!!!!!!!!!!!!!!!!!!!!!!!!!!!!edit', row: m })()
+                        actionOnclick({ actionType: 'EDIT', row: m })()
                         links.EDIT()
                     }}
                 />
@@ -306,7 +310,8 @@ export class ActionButtons extends React.PureComponent<Props>{
                     ariaLabel="read"
                     onClick={() => {
                         actionOnclick('read', m)
-                        links.GROUP_DETAILS()
+                        actionOnclick({ actionType: 'VIEW', row: m })()
+                        links.VIEW()
                     }}
                 />
                 <IconButton
@@ -324,6 +329,7 @@ export class ActionButtons extends React.PureComponent<Props>{
                     ariaLabel="delete"
                     onClick={() => {
                         actionOnclick('delete', m)
+                        actionOnclick({ actionType: 'DELETE', row: m })()
                         links.DELETE()
                     }}
                 />
@@ -388,7 +394,11 @@ export class Group extends React.PureComponent<Props>{
 
                             hasGroupDetails && groupDetails === undefined && <Spinner style={{ height: 335 }} size={SpinnerSize.large} />,
                             (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
-                                return <TextField label={m} disabled={viewOnly} defaultValue={groupDetails && groupDetails[m]} />
+                                return <TextField
+                                    label={m}
+                                    disabled={viewOnly}
+                                    placeholder={groupDetails && groupDetails[m]}
+                                />
                             })
                         ]}
 
@@ -411,7 +421,7 @@ export class Group extends React.PureComponent<Props>{
                             text={viewOnly ? '' : 'OK'}
                             title={viewOnly ? 'EDIT' : "OK"}
                             ariaLabel={viewOnly ? 'EDIT' : "OK"}
-                            onClick={links.HOME}
+                            onClick={links.EDIT}
                         />
                         <Button
                             styles={{
@@ -428,7 +438,7 @@ export class Group extends React.PureComponent<Props>{
                             iconProps={{ iconName: 'back' }}
                             title="back"
                             ariaLabel="back"
-                            onClick={links.HOME}
+                            onClick={links.BACK}
                         />
                     </div>
 

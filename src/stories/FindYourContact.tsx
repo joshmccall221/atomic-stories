@@ -44,7 +44,7 @@ export default class extends BaseComponent<FindYourContactProps> {
                             {
                                 type: 'NO_SHADOW',
                                 component: [
-                                    !this.props.contactList.length && <Spinner style={{ height: 335 }} size={SpinnerSize.large} />,
+                                    !this.props.contactList.length && <Spinner style={{ height: 465 }} size={SpinnerSize.large} />,
                                 ].filter(f => f)
                                 // component: !contactList.length  ? [<ShimmerLoadDataExample />] : contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
                             },

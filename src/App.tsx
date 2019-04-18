@@ -10,10 +10,12 @@ class App extends Component<any, any>{
   constructor(props: Readonly<{}>) {
     super(props);
     this.state = {
+      setStateHandler: this.setThings,
       isToolManager: this.isToolManager(),
       contactGroups: [this.apiContactGroups()],
       contactGroupDetails: undefined,
       apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
+      apiContactGroupsIDDisplayName: this.apiContactGroupsIDDisplayName.bind(this),
       toolManagers: [this.apiToolManagers()],
       delayResults: true,
       peopleList: [],
@@ -95,6 +97,29 @@ class App extends Component<any, any>{
       });
   }
 
+  async apiContactGroupsIDDisplayName({ id }: any) {
+    return await adalApiFetch(
+      axios,
+      `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDDisplayName}`,
+      enpointConfig
+    ).then((response: { data: any; }) => {
+      const contactGroupDetails = [response.data].map(m => ({
+        ...m,
+        'Name': m.name,
+        'Primary Contact': m.primaryContact,
+        'Secondary Contact': m.secondaryContact,
+        'Leader': m.leader,
+        'OSS Name': m.ossName,
+        'OSS Contact': m.ossContact,
+        'Last Updated User': m.lastUpdatedUser,
+      }))[0];
+      this.setThings({
+        contactGroupDetails
+      });
+      console.log('contactGroupDetails', { contactGroupDetails })
+      return contactGroupDetails;
+    });
+  }
   async apiContactGroupsIDAlias({ id }: any) {
     return await adalApiFetch(
       axios,
@@ -189,7 +214,6 @@ class App extends Component<any, any>{
             FindYourContact: (
               <FindYourContact
                 {...this.state}
-                setStateHandler={this.setThings}
                 apiSearchUsers={this.apiSearchUsers.bind(this)}
                 apiSearchContactsLegal={this.apiSearchContactsLegal.bind(this)}
               />
@@ -236,19 +260,72 @@ class App extends Component<any, any>{
             ADD_CONTACT_GROUP: [
               <Group
                 title={'New Contact Group'}
-                links={this.state.links}
+                links={{
+                  ...this.state.links,
+                  BACK: this.state.links.GROUP_DETAILS,
+                  EDIT: this.state.links.GROUP_DETAILS,
+                }}
                 textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />
             ],
             EDIT_CONTACT_GROUP: [
               <Group
                 title={'Edit Contact Group'}
-                links={this.state.links}
+                links={{
+                  ...this.state.links,
+                  BACK: this.state.links.GROUP_DETAILS,
+                  EDIT: this.state.links.GROUP_DETAILS,
+                }}
+
                 textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
                 groupDetails={this.state.contactGroupDetails}
                 hasGroupDetails
               />],
 
-            VIEW_CONTACT_GROUP: [<Group title={'View Contact Group'} links={this.state.links} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />],
+            VIEW_CONTACT_GROUP: [
+              <Group
+                title={'View Contact Group'}
+                links={{
+                  ...this.state.links,
+                  BACK: this.state.links.GROUP_DETAILS,
+                  EDIT: this.state.links.EDIT('_CONTACT_GROUP')
+                }}
+                textFields={[
+                  'Name',
+                  'Primary Contact',
+                  'Secondary Contact',
+                  'Leader',
+                  'OSS Name',
+                  'OSS Contact'
+                ]}
+                groupDetails={this.state.contactGroupDetails}
+                hasGroupDetails
+                viewOnly
+              />
+            ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             ADD_TOOL_MANAGER: [
               <Group
@@ -264,7 +341,12 @@ class App extends Component<any, any>{
                 textFields={['Tool Manager']}
                 groupDetails={this.state.contactGroups}
               />],
-            VIEW_TOOL_MANAGER: [<Group title={'View Group'} links={this.state.links} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />]
+            VIEW_TOOL_MANAGER: [
+              <Group
+                title={'View Group'}
+                links={this.state.links}
+                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+              />]
           }[route]
         }
       </>
@@ -279,6 +361,7 @@ export const endpoints = (params: any) => {
   return ({
     apiContactGroups: '/api/ContactGroups/',
     apiContactGroupsIDAlias: `/api/ContactGroups/${id}/alias`,
+    apiContactGroupsIDDisplayName: `/api/ContactGroups/${id}/DisplayName`,
     apiSearchContactsLegal: '/api/Search/Contacts/Legal/',
     apiSearchContactsOSS: '/api/Search/Contacts/OSS/',
     apiSearchUser: '/api/Search/Users/',
