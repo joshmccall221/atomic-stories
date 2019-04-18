@@ -20,23 +20,7 @@ export class Test extends React.PureComponent {
     }
 }
 export default class extends BaseComponent<FindYourContactProps> {
-    // renderPersonBadge(cl: { length: any; map: (arg0: (m: IPersonaSharedProps) => JSX.Element) => void; }) {
-    //     if (cl.length) {
-    //         return cl.map((c) => <PersonaBadge person={c} />)
-    //     }
-    //     return <PersonaBadge />
-
-    // }
-    // getStyle = (optStyles: any) => ({
-    //     display: "inline-block",
-    //     margin: "auto",
-    //     marginTop: 50,
-    //     textAlign: "center",
-    //     width: "100%",
-    //     ...optStyles
-    // });
     render() {
-        console.log('FindYourContacts', { ...this.props })
         const { currentSelectedItems, mostRecentlyUsed, peopleList, setStateHandler, links } = this.props
         return (
             <>

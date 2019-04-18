@@ -34,14 +34,12 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
 
 
     public render() {
-        console.log('ContactPicker', { ...this.props })
         return (
             <>
                 <CompactPeoplePicker
                     selectedItems={this.props.currentSelectedItems}
                     onItemSelected={(selectedItem?: any | undefined) => {
 
-                        console.log('=======onItemSelected', { selectedItem })
                         selectedItem && this.props.setStateHandler({ currentSelectedItems: [selectedItem] })
                         selectedItem && this.props.apiSearchContactsLegal((selectedItem as any)['mail']).then((r: any) => {
 
@@ -66,7 +64,6 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                             index={props.index}
                             onRemoveItem={() => {
                                 this.props.setStateHandler({ currentSelectedItems: [] })
-                                console.log('onRemoveItem')
 
                             }}
                         />
@@ -162,7 +159,6 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
         console.log("_onFilterChanged", { filterText, props: this.props })
         if (filterText) {
             const results = this.props.apiSearchUsers(filterText)
-            console.log({ results })
             return results;
             // let filteredPersonas: IPersonaProps[] = this._filterPersonasByText(filterText);
             // if (currentPersonas) {
