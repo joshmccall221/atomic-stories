@@ -71,7 +71,7 @@ export class Layout extends React.PureComponent<Props>{
 }
 export default class extends React.PureComponent<Props>{
     render() {
-        const { contactList, links } = this.props;
+        const { contactList, links, title, columns } = this.props;
         console.log('contact group', this.props)
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
             console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
@@ -83,7 +83,7 @@ export default class extends React.PureComponent<Props>{
         }
         return (
             <Layout
-                title={'Contact Groups'}
+                title={title}
                 children={
 
                     <Shadow
@@ -119,12 +119,7 @@ export default class extends React.PureComponent<Props>{
                                                     ],
                                                 }))
                                             ]}
-                                            columns={[
-                                                { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
-                                                { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
-                                                { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
-                                                { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
-                                            ]}
+                                            columns={columns}
                                             enableShimmer={false}
                                             onRenderRow={this._onRenderRow}
                                         />
@@ -163,7 +158,13 @@ export default class extends React.PureComponent<Props>{
 export class ToolManagers extends React.PureComponent<Props>{
     render() {
         const { contactList, links } = this.props;
-        const actionOnclick = () => () => {
+        const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
+            console.log('ToolManagersactionOnclick', { props: this.props, actionType, row, id: row.id })
+            this.props.setStateHandler('ToolManagersactionOnclick', { contactGroupDetails: undefined })
+            return ({
+                VIEW: () => this.props.apiToolManagersIDDisplayName({ id: row.id }),
+                EDIT: () => this.props.apiToolManagersIDAlias({ id: row.id }),
+            })[actionType]();
         }
         return (
             <>

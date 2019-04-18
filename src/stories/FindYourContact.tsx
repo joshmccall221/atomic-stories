@@ -80,34 +80,6 @@ export default class extends BaseComponent<FindYourContactProps> {
 
                     />
                 </Layout>
-
-                {/* <div style={{ ...this.getStyle({}) }}>
-                    <h1 style={{ ...this.getStyle({ marginBottom: 20 }), }} > Search Contacts</h1>
-                    <ContactPicker
-                        peopleList={peopleList}
-                        mostRecentlyUsed={mostRecentlyUsed}
-                        currentSelectedItems={currentSelectedItems}
-                    />
-                    {this.renderPersonBadge(contactList)}
-                </div>
-                <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' }}>
-                    <IconButton
-                        styles={{
-                            root: {
-                                // width: '15%',
-                                height: 32,
-                                // backgroundColor: 'rgb(0, 120, 212)',
-                                // color: 'white',
-                                padding: 0,
-                            }
-                        }}
-                        iconProps={{ iconName: 'settings' }}
-                        title="search"
-                        ariaLabel="search"
-                        onClick={settingsOnclick}
-                    />
-
-                </div> */}
             </>
         );
     }

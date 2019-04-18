@@ -16,6 +16,8 @@ class App extends Component<any, any>{
       contactGroupDetails: undefined,
       apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
       apiContactGroupsIDDisplayName: this.apiContactGroupsIDDisplayName.bind(this),
+      apiToolManagersIDAlias: this.apiToolManagersIDAlias.bind(this),
+      apiToolManagersIDDisplayName: this.apiToolManagersIDDisplayName.bind(this),
       toolManagers: [this.apiToolManagers()],
       delayResults: true,
       peopleList: [],
@@ -203,6 +205,50 @@ class App extends Component<any, any>{
         console.log({ error });
       });
   }
+  async apiToolManagersIDAlias({ id }: any) {
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({ id }).apiToolManagersIDAlias}`, enpointConfig)
+      .then((response: any) => {
+        console.log('apiToolManagersIDAlias', { authContext, response })
+        //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
+        const contactGroupDetails = [response.data].map(m => ({
+          ...m,
+          'Tool Manager': m.toolManager,
+          'Added By': m.addedBy,
+          'Last Updated': m.lastUpdated,
+          'Last Updated By': m.lastUpdatedBy
+        }))[0];
+        this.setThings({
+          contactGroupDetails
+        });
+        return response.data;
+      })
+      .catch(function (error: any) {
+        console.log({ error });
+      });
+  }
+  async apiToolManagersIDDisplayName({ id }: any) {
+    const endpoint = endpoints({ id }).apiToolManagersIDDisplayName;
+    console.log('apiToolManagersIDDisplayName', { id, endpoint })
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoint}`, enpointConfig)
+      .then((response: any) => {
+        console.log('apiToolManagersIDDisplayName', { authContext, response })
+        //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
+        const contactGroupDetails = [response.data].map(m => ({
+          ...m,
+          'Tool Manager': m.toolManager,
+          'Added By': m.addedBy,
+          'Last Updated': m.lastUpdated,
+          'Last Updated By': m.lastUpdatedBy
+        }))[0];
+        this.setThings({
+          contactGroupDetails
+        });
+        return response.data;
+      })
+      .catch(function (error: any) {
+        console.log({ error });
+      });
+  }
 
   render() {
     const { route } = this.state;
@@ -220,6 +266,7 @@ class App extends Component<any, any>{
             ),
             TOOL_MANAGERS: [
               <ToolManagers
+                {...this.state}
                 links={{
                   ...this.state.links,
                   // ADD: linkTo('office-ui-fabric-react: Screens', 'New Tool Manager Group'),
@@ -238,11 +285,20 @@ class App extends Component<any, any>{
             ],
             GROUP_DETAILS: [
               <ContactGroup
-                {...{ ...this.state }}
+                title={"Contact Group"}
+                {...this.state}
                 links={{
                   ...this.state.links,
                   // ADD: this.state.links.ADD('_CONTACT_GROUP')
                 }}
+                columns={
+                  [
+                    { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
+                    { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
+                    { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
+                    { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
+                  ]
+                }
                 contactList={
                   this.state.contactGroups.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
                     Name: m.name,
@@ -310,7 +366,9 @@ class App extends Component<any, any>{
                   BACK: this.state.links.TOOL_MANAGERS,
                   EDIT: this.state.links.TOOL_MANAGERS
                 }}
-                textFields={['Tool Manager']}
+                textFields={[
+                  'Tool Manager'
+                ]}
               />],
 
             EDIT_TOOL_MANAGER: [
@@ -321,8 +379,14 @@ class App extends Component<any, any>{
                   BACK: this.state.links.TOOL_MANAGERS,
                   EDIT: this.state.links.TOOL_MANAGERS
                 }}
-                textFields={['Tool Manager']}
-                groupDetails={this.state.contactGroups}
+                textFields={[
+                  'Tool Manager',
+                  'Added By',
+                  'Last Updated',
+                  'Last Updated By'
+
+                ]}
+                groupDetails={this.state.contactGroupDetails}
               />],
             VIEW_TOOL_MANAGER: [
               <Group
@@ -332,7 +396,11 @@ class App extends Component<any, any>{
                   BACK: this.state.links.TOOL_MANAGERS,
                   EDIT: this.state.links.EDIT('_TOOL_MANAGER')
                 }}
-                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+                textFields={[
+                  'Tool Manager'
+                ]}
+                groupDetails={this.state.contactGroupDetails}
+                viewOnly
               />]
           }[route]
         }
@@ -354,6 +422,8 @@ export const endpoints = (params: any) => {
     apiSearchUser: '/api/Search/Users/',
     apiToolManagers: '/api/ToolManagers',
     apiToolManagersAliasToolManager: `/api/ToolManagers/${alias}/ToolManager`,
+    apiToolManagersIDAlias: `/api/ToolManagers/${id}/Alias`,
+    apiToolManagersIDDisplayName: `/api/ToolManagers/${id}/DisplayName`,
   });
 };
 
