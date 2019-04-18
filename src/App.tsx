@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
-import ContactGroup, { NewGroup } from './stories/TableView';
+import ContactGroup, { NewGroup, ToolManagers } from './stories/TableView';
 const { authContext, adalApiFetch } = require('./adalConfig');
 
 class App extends Component<any, any>{
@@ -11,7 +11,8 @@ class App extends Component<any, any>{
     super(props);
     this.state = {
       isToolManager: this.isToolManager(),
-      groupDetails: [this.apiToolManagers()],
+      groupDetails: [this.apiContactGroups()],
+      toolManagers: [this.apiToolManagers()],
       delayResults: true,
       peopleList: [],
       mostRecentlyUsed: [],
@@ -21,12 +22,12 @@ class App extends Component<any, any>{
       links: {
         HOME: () => this.setState({ route: 'FindYourContact' }),
         ADD: (param: any) => () => this.setState({ route: `ADD${param}` }),
-        OK: () => this.setState({ route: 'OK' }),
-        TOOL_MANAGERS: () => this.setState({ route: 'TOOLS_MANAGER' }),
+        // OK: () => this.setState({ route: 'OK' }),
+        TOOL_MANAGERS: () => this.setState({ route: 'TOOL_MANAGERS' }),
         GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
         // GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
-        EDIT: () => this.setState({ route: 'EDIT' }),
-        DELETE: () => console.log('DELETE'),
+        EDIT: (param: any) => () => this.setState({ route: `EDIT${param}` }),
+        DELETE: (param: any) => () => console.log('DELETE'),
       }
     };
     this.setThings = this.setThings.bind(this);
@@ -108,12 +109,26 @@ class App extends Component<any, any>{
     });
   }
 
-  async apiToolManagers() {
+  async apiContactGroups() {
     return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiContactGroups}`, enpointConfig)
       .then((response: { data: any; }) => {
         console.log({ response })
         this.setState({
           groupDetails: response.data
+        });
+        return response.data;
+      })
+      .catch(function (error: any) {
+        console.log({ error });
+      });
+  }
+
+  async apiToolManagers() {
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiToolManagers}`, enpointConfig)
+      .then((response: { data: any; }) => {
+        console.log('apiToolManagers', { response })
+        this.setState({
+          toolManagers: response.data
         });
         return response.data;
       })
@@ -138,6 +153,7 @@ class App extends Component<any, any>{
 
   render() {
     const { route } = this.state;
+    console.log('=========route', { route })
     return (
       <>
         {
@@ -150,11 +166,30 @@ class App extends Component<any, any>{
                 apiSearchContactsLegal={this.apiSearchContactsLegal.bind(this)}
               />
             ),
+            TOOL_MANAGERS: [
+              <ToolManagers
+                links={{
+                  ...this.state.links,
+                  // ADD: linkTo('office-ui-fabric-react: Screens', 'New Tool Manager Group'),
+                  // EDIT: linkTo('office-ui-fabric-react: Screens', 'Edit Tool Manager Group'),
+                  // GROUP_DETAILS: linkTo('office-ui-fabric-react: Screens', 'Tool Manager Group Details')
+                }}
+                contactList={
+                  this.state.toolManagers.map((m: { toolManager: any; }) =>
+                    ({
+                      TOOL_MANAGERS: m.toolManager,
+                      ...m
+                    })
+                  )
+                }
+              />
+            ],
             GROUP_DETAILS: [
               <ContactGroup
 
                 links={{
-                  ...this.state.links
+                  ...this.state.links,
+                  // ADD: this.state.links.ADD('_CONTACT_GROUP')
                 }}
                 contactList={
                   this.state.groupDetails.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({

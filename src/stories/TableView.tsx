@@ -99,7 +99,11 @@ export default class extends React.PureComponent<Props>{
                                                 (m: any) => ({
                                                     ...m,
                                                     Actions: [
-                                                        <ActionButtons m={m} actionOnclick={actionOnclick} links={links} />,
+                                                        <ActionButtons m={m} actionOnclick={actionOnclick} links={{
+                                                            ...links,
+                                                            ...{ EDIT: links.EDIT('_CONTACT_GROUP') },
+                                                            ...{ DELETE: links.DELETE('_CONTACT_GROUP') }
+                                                        }} />,
                                                     ],
                                                 }))
                                             ]}
@@ -337,7 +341,7 @@ export class NavButtons extends React.PureComponent<Props>{
                     iconProps={{ iconName: 'people' }}
                     title="ContactGroups"
                     ariaLabel="ContactGroups"
-                    onClick={links.TOOL_MANAGERS}
+                    onClick={links.GROUP_DETAILS}
                 // onClick={actionOnclick('edit', m)}
                 />
                 <IconButton
@@ -382,7 +386,7 @@ export class NewGroup extends React.PureComponent<Props>{
                             text={viewOnly ? '' : 'OK'}
                             title={viewOnly ? 'EDIT' : "OK"}
                             ariaLabel={viewOnly ? 'EDIT' : "OK"}
-                            onClick={links.OK}
+                            onClick={links.HOME}
                         />
                         <Button
                             styles={{
@@ -399,7 +403,7 @@ export class NewGroup extends React.PureComponent<Props>{
                             iconProps={{ iconName: 'back' }}
                             title="back"
                             ariaLabel="back"
-                            onClick={links.OK}
+                            onClick={links.HOME}
                         />
                     </div>
 
