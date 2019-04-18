@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
-import ContactGroup, { } from './stories/TableView';
+import ContactGroup, { NewGroup } from './stories/TableView';
 const { authContext, adalApiFetch } = require('./adalConfig');
 
 class App extends Component<any, any>{
@@ -20,7 +20,7 @@ class App extends Component<any, any>{
       route: 'FindYourContact',
       links: {
         HOME: () => this.setState({ route: 'FindYourContact' }),
-        ADD: () => this.setState({ route: 'ADD' }),
+        ADD: (param: any) => () => this.setState({ route: `ADD${param}` }),
         OK: () => this.setState({ route: 'OK' }),
         TOOL_MANAGERS: () => this.setState({ route: 'TOOLS_MANAGER' }),
         GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
@@ -45,11 +45,10 @@ class App extends Component<any, any>{
         console.log({ error });
       });
     this.apiSearchUsers(authContext._user.profile.name).then(people => {
-      const uniquePeople = people.map((m: { mail: any; }) => {
+      const uniquePeople = people && people.map((m: { mail: any; }) => {
         return { [m.mail]: m };
       });
       const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
-        // Object.keys({'a': {'a':'b'}})[0]
         return m[Object.keys(m)[0]];
       });
       this.setThings({
@@ -78,7 +77,7 @@ class App extends Component<any, any>{
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiSearchUser}${contact}`, enpointConfig)
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiSearchUser}${contact}`, enpointConfig)
       .then(function (response: { data: { map: (arg0: (m: any) => any) => void; }; }) {
         const people = response.data.map(m => ({
           ...m,
@@ -96,7 +95,7 @@ class App extends Component<any, any>{
   async apiSearchContactsLegal(contact: any) {
     return await adalApiFetch(
       axios,
-      `${endpointBaseUrl}${endpoints.apiSearchContactsLegal}${contact}`,
+      `${endpointBaseUrl}${endpoints({}).apiSearchContactsLegal}${contact}`,
       enpointConfig
     ).then(function (response: { data: any; }) {
       const people = [response.data].map(m => ({
@@ -110,8 +109,9 @@ class App extends Component<any, any>{
   }
 
   async apiToolManagers() {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiToolManagers}`, enpointConfig)
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiContactGroups}`, enpointConfig)
       .then((response: { data: any; }) => {
+        console.log({ response })
         this.setState({
           groupDetails: response.data
         });
@@ -122,10 +122,14 @@ class App extends Component<any, any>{
       });
   }
   async isToolManager() {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints.apiToolManagers}`, enpointConfig)
-      .then(function (response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) {
-        const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.name).length;
-        return isToolManager;
+    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({ alias: authContext._user.userName }).apiToolManagersAliasToolManager}`, enpointConfig)
+      .then((response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
+        console.log('apiToolManagersAliasToolManager', { authContext, response })
+        //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
+        this.setState({
+          isToolManager: response.data
+        });
+        return response.data;
       })
       .catch(function (error: any) {
         console.log({ error });
@@ -153,19 +157,24 @@ class App extends Component<any, any>{
                   ...this.state.links
                 }}
                 contactList={
-                  this.state.groupDetails.map((m: { toolManager: any; }) => ({
-                    Name: m.toolManager || 'Name',
-                    Primary: 'Primary',
-                    Secondary: 'Secondary',
-                    Lead: 'Lead',
-                    OSS_NAME: 'OSS_NAME',
-                    OSS_CONTACT: 'OSS_CONTACT'
+                  this.state.groupDetails.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
+                    Name: m.name,
+                    Primary: m.primaryContact,
+                    Secondary: m.secondaryContact,
+                    Lead: m.leader,
+                    OSS_NAME: m.ossName,
+                    OSS_CONTACT: m.ossContact
 
                   }))
 
                 }
               />
-            ]
+            ],
+            "ADD_CONTACT_GROUP": [<NewGroup
+              title={'New Group'}
+              links={this.state.links}
+              textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+            />]
           }[route]
         }
       </>
@@ -175,16 +184,21 @@ class App extends Component<any, any>{
 
 export default App;
 
-export const endpoints = {
-  apiSearchContactsLegal: '/api/Search/Contacts/Legal/',
-  apiSearchContactsOSS: '/api/Search/Contacts/OSS/',
-  apiSearchUser: '/api/Search/Users/',
-  apiToolManagers: '/api/ToolManagers'
+export const endpoints = (params: any) => {
+  const { alias } = params;
+  return ({
+    apiContactGroups: '/api/ContactGroups/',
+    apiSearchContactsLegal: '/api/Search/Contacts/Legal/',
+    apiSearchContactsOSS: '/api/Search/Contacts/OSS/',
+    apiSearchUser: '/api/Search/Users/',
+    apiToolManagers: '/api/ToolManagers',
+    apiToolManagersAliasToolManager: `/api/ToolManagers/${alias}/ToolManager`,
+  });
 };
 
-export const endpointBaseUrl =
-  window.location.hostname === 'localhost'
-    ? `https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net`
-    : `https://fyc-dev.azurewebsites.net`;
+export const endpointBaseUrl = `https://fyc-dev.azurewebsites.net`;
+// window.location.hostname === 'localhost'
+//   ? `https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net`
+//   : `https://fyc-dev.azurewebsites.net`;
 
 export const enpointConfig = { method: 'GET' };

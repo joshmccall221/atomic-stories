@@ -22,6 +22,7 @@ export class Test extends React.PureComponent {
 export default class extends BaseComponent<FindYourContactProps> {
     render() {
         const { currentSelectedItems, mostRecentlyUsed, peopleList, setStateHandler, links } = this.props
+        console.log({ FindYourContactProps: this.props, isToolManager: this.props.isToolManager })
         return (
             <>
 
@@ -65,8 +66,8 @@ export default class extends BaseComponent<FindYourContactProps> {
                                             }
                                         }}
                                         iconProps={{ iconName: 'settings' }}
-                                        title="search"
-                                        ariaLabel="search"
+                                        title="Management"
+                                        ariaLabel="Management"
                                         onClick={() => {
                                             console.log('settings onclick')
                                             links.GROUP_DETAILS()

@@ -76,8 +76,7 @@ export default class extends React.PureComponent<Props>{
         }
         return (
             <Layout
-
-                title={'Group Details'}
+                title={'Contact Groups'}
                 children={
 
                     <Shadow
@@ -117,7 +116,10 @@ export default class extends React.PureComponent<Props>{
                             },
                             {
                                 type: 'NO_SHADOW',
-                                component: < NavButtons links={links} />
+                                component: < NavButtons links={{
+                                    ...links,
+                                    ...{ ADD: links.ADD('_CONTACT_GROUP') }
+                                }} />
                             }
 
                         ]

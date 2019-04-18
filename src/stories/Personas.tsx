@@ -8,7 +8,6 @@ export class PersonaBadge extends React.Component<PersonProps> {
 
     public render(): JSX.Element {
         const { person } = this.props;
-        const mailTo = `mailto:${(person as any).mail}`
         return (
             <>
                 <PersonaCoin
@@ -21,8 +20,16 @@ export class PersonaBadge extends React.Component<PersonProps> {
                 />
                 <h1 style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.2, fontFamily: 'arial', }}>{person && person.text}</h1>
                 <p style={{ color: 'grey', fontSize: 13, fontFamily: 'arial' }} >{person && person.secondaryText}</p>
-                <a href={mailTo}>
-                    <PrimaryButton data-automation-id="test" allowDisabledFocus={true} text={"Contact"} style={{ width: '100%', marginTop: 10, marginBottom: 16 }} onClick={() => console.log('clicked')} />
+                <a
+                    title={`Send email to: ` + (person as any).mail}
+                    href={'Send E-Mail'}>
+                    <PrimaryButton
+                        text={"Contact"}
+                        data-automation-id="test"
+                        allowDisabledFocus={true}
+                        style={{ width: '100%', marginTop: 10, marginBottom: 16 }}
+                        onClick={() => console.log('clicked')}
+                    />
                 </a>
             </>
         );
