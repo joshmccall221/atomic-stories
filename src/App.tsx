@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
-import ContactGroup, { NewGroup, ToolManagers } from './stories/TableView';
+import ContactGroup, { Group, ToolManagers } from './stories/TableView';
 const { authContext, adalApiFetch } = require('./adalConfig');
 
 class App extends Component<any, any>{
@@ -11,7 +11,9 @@ class App extends Component<any, any>{
     super(props);
     this.state = {
       isToolManager: this.isToolManager(),
-      groupDetails: [this.apiContactGroups()],
+      contactGroups: [this.apiContactGroups()],
+      contactGroupDetails: undefined,
+      apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
       toolManagers: [this.apiToolManagers()],
       delayResults: true,
       peopleList: [],
@@ -25,7 +27,7 @@ class App extends Component<any, any>{
         // OK: () => this.setState({ route: 'OK' }),
         TOOL_MANAGERS: () => this.setState({ route: 'TOOL_MANAGERS' }),
         GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
-        // GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
+        VIEW: (param: any) => () => this.setState({ route: `VIEW${param}` }),
         EDIT: (param: any) => () => this.setState({ route: `EDIT${param}` }),
         DELETE: (param: any) => () => console.log('DELETE'),
       }
@@ -74,7 +76,7 @@ class App extends Component<any, any>{
   componentDidMount() {
     this._isMounted = true;
   }
-  setThings(state: { contactList?: any; peopleListObject?: any; peopleList?: any[]; mostRecentlyUsed?: any[]; currentSelectedItems?: any[]; }) {
+  setThings(state: any) {
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
@@ -91,6 +93,32 @@ class App extends Component<any, any>{
       .catch(function (error: any) {
         console.log({ error });
       });
+  }
+
+  async apiContactGroupsIDAlias({ id }: any) {
+    return await adalApiFetch(
+      axios,
+      `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDAlias}`,
+      enpointConfig
+    ).then((response: { data: any; }) => {
+      const contactGroupDetails = [response.data].map(m => ({
+        ...m,
+        'Name': m.name,
+        'Primary Contact': m.primaryContact,
+        'Secondary Contact': m.secondaryContact,
+        'OSS Name': m.ossName,
+        'OSS Contact': m.ossContact,
+        'Leader': m.leader,
+        'Last Updated': m.lastUpdated,
+        'Owner': m.owner,
+        'Last Updated User': m.lastUpdatedUser,
+      }))[0];
+      this.setThings({
+        contactGroupDetails
+      });
+      console.log('contactGroupDetails', { contactGroupDetails })
+      return contactGroupDetails;
+    });
   }
 
   async apiSearchContactsLegal(contact: any) {
@@ -114,7 +142,7 @@ class App extends Component<any, any>{
       .then((response: { data: any; }) => {
         console.log({ response })
         this.setState({
-          groupDetails: response.data
+          contactGroups: response.data
         });
         return response.data;
       })
@@ -186,30 +214,57 @@ class App extends Component<any, any>{
             ],
             GROUP_DETAILS: [
               <ContactGroup
-
+                {...{ ...this.state }}
                 links={{
                   ...this.state.links,
                   // ADD: this.state.links.ADD('_CONTACT_GROUP')
                 }}
                 contactList={
-                  this.state.groupDetails.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
+                  this.state.contactGroups.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
                     Name: m.name,
                     Primary: m.primaryContact,
                     Secondary: m.secondaryContact,
                     Lead: m.leader,
                     OSS_NAME: m.ossName,
-                    OSS_CONTACT: m.ossContact
-
+                    OSS_CONTACT: m.ossContact,
+                    ...m
                   }))
 
                 }
               />
             ],
-            "ADD_CONTACT_GROUP": [<NewGroup
-              title={'New Group'}
-              links={this.state.links}
-              textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
-            />]
+            ADD_CONTACT_GROUP: [
+              <Group
+                title={'New Contact Group'}
+                links={this.state.links}
+                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />
+            ],
+            EDIT_CONTACT_GROUP: [
+              <Group
+                title={'Edit Contact Group'}
+                links={this.state.links}
+                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+                groupDetails={this.state.contactGroupDetails}
+                hasGroupDetails
+              />],
+
+            VIEW_CONTACT_GROUP: [<Group title={'View Contact Group'} links={this.state.links} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />],
+
+            ADD_TOOL_MANAGER: [
+              <Group
+                title={'New Group'}
+                links={this.state.links}
+                textFields={['Tool Manager']}
+              />],
+
+            EDIT_TOOL_MANAGER: [
+              <Group
+                title={'Edit Group'}
+                links={this.state.links}
+                textFields={['Tool Manager']}
+                groupDetails={this.state.contactGroups}
+              />],
+            VIEW_TOOL_MANAGER: [<Group title={'View Group'} links={this.state.links} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />]
           }[route]
         }
       </>
@@ -220,9 +275,10 @@ class App extends Component<any, any>{
 export default App;
 
 export const endpoints = (params: any) => {
-  const { alias } = params;
+  const { alias, id } = params;
   return ({
     apiContactGroups: '/api/ContactGroups/',
+    apiContactGroupsIDAlias: `/api/ContactGroups/${id}/alias`,
     apiSearchContactsLegal: '/api/Search/Contacts/Legal/',
     apiSearchContactsOSS: '/api/Search/Contacts/OSS/',
     apiSearchUser: '/api/Search/Users/',

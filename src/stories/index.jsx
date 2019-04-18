@@ -3,7 +3,7 @@ import {storiesOf, setAddon} from '@storybook/react';
 import {Shimmer, Button, people} from 'office-ui-fabric-react';
 import {ShimmerLoadDataExample} from './ShimmerLoadDataExample';
 import {PersonaBadge} from './Personas';
-import ContactGroup, {NewGroup, ToolManagers, Shadow} from './TableView';
+import ContactGroup, {Group, ToolManagers, Shadow} from './TableView';
 import {ButtonDefaultExample} from './IButtonBasicExampleStyleProps';
 import FindYourContact from './FindYourContact';
 import {boolean, withKnobs, text, object, number} from '@storybook/addon-knobs';
@@ -78,14 +78,14 @@ storiesOf('office-ui-fabric-react: Screens', module)
     />
   ))
   .add('New Group', () => (
-    <NewGroup
+    <Group
       title={'New Group'}
       links={links}
       textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
     />
   ))
   .add('Group Details', () => (
-    <NewGroup
+    <Group
       links={links}
       title={'Group Details'}
       textFields={[
@@ -99,7 +99,7 @@ storiesOf('office-ui-fabric-react: Screens', module)
         'Owner',
         'Last Upadated User'
       ]}
-      groupDetails={any.objectWithKeys(
+      contactGroups={any.objectWithKeys(
         [
           'Name',
           'Primary Contact',
@@ -119,11 +119,11 @@ storiesOf('office-ui-fabric-react: Screens', module)
     />
   ))
   .add('Edit Group', () => (
-    <NewGroup
+    <Group
       title={'Edit Group'}
       links={links}
       textFields={['Name', 'Primary Contact', 'Secondary Contact', 'OSS Name', 'OSS Contact', 'Leader']}
-      groupDetails={any.objectWithKeys(
+      contactGroups={any.objectWithKeys(
         ['Name', 'Primary Contact', 'Secondary Contact', 'OSS Name', 'OSS Contact', 'Leader'],
         {
           factory: () => ({value: any.word()})
@@ -147,26 +147,26 @@ storiesOf('office-ui-fabric-react: Screens', module)
       )}
     />
   ))
-  .add('New Tool Manager Group', () => <NewGroup title={'New Group'} links={links} textFields={['ToolManager']} />)
+  .add('New Tool Manager Group', () => <Group title={'New Group'} links={links} textFields={['ToolManager']} />)
   .add('Tool Manager Group Details', () => (
-    <NewGroup
+    <Group
       links={links}
       title={'Group Details'}
       textFields={['ToolManager', 'AddedBy', 'LastUpdated', 'LastUpdatedBy']}
-      groupDetails={any.objectWithKeys(['ToolManager', 'AddedBy', 'LastUpdated', 'LastUpdatedBy'], {
+      contactGroups={any.objectWithKeys(['ToolManager', 'AddedBy', 'LastUpdated', 'LastUpdatedBy'], {
         factory: () => ({value: any.word()})
       })}
       viewOnly
     />
   ))
   .add('Edit Tool Manager Group', () => (
-    <NewGroup
+    <Group
       title={'Edit Tool Manager'}
       links={{
         ...links
       }}
       textFields={['ToolManager']}
-      groupDetails={any.objectWithKeys(['ToolManager'], {
+      contactGroups={any.objectWithKeys(['ToolManager'], {
         factory: () => ({value: any.word()})
       })}
     />

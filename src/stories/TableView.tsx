@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ShimmeredDetailsList, IDetailsRowProps, IDetailsRowStyles, DetailsRow, getTheme, IconButton, TextField, Button } from 'office-ui-fabric-react';
+import { ShimmeredDetailsList, IDetailsRowProps, IDetailsRowStyles, DetailsRow, getTheme, IconButton, TextField, Button, Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import { PersonProps } from './FindYourContact';
 
 export type Props = { contactList: PersonProps[]; } & any;
@@ -72,7 +72,10 @@ export class Layout extends React.PureComponent<Props>{
 export default class extends React.PureComponent<Props>{
     render() {
         const { contactList, links } = this.props;
-        const actionOnclick = (actionType: string, row: any) => () => {
+        console.log('contact group', this.props)
+        const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
+            console.log('actionOnclick', { actionType, row, id: row.id })
+            this.props.apiContactGroupsIDAlias({ id: row.id })
         }
         return (
             <Layout
@@ -99,11 +102,16 @@ export default class extends React.PureComponent<Props>{
                                                 (m: any) => ({
                                                     ...m,
                                                     Actions: [
-                                                        <ActionButtons m={m} actionOnclick={actionOnclick} links={{
-                                                            ...links,
-                                                            ...{ EDIT: links.EDIT('_CONTACT_GROUP') },
-                                                            ...{ DELETE: links.DELETE('_CONTACT_GROUP') }
-                                                        }} />,
+                                                        <ActionButtons
+                                                            {...{ ...this.props }}
+                                                            m={m}
+                                                            actionOnclick={actionOnclick}
+                                                            links={{
+                                                                ...links,
+                                                                ...{ VIEW: links.VIEW('_CONTACT_GROUP') },
+                                                                ...{ EDIT: links.EDIT('_CONTACT_GROUP') },
+                                                                ...{ DELETE: links.DELETE('_CONTACT_GROUP') }
+                                                            }} />,
                                                     ],
                                                 }))
                                             ]}
@@ -172,7 +180,12 @@ export class ToolManagers extends React.PureComponent<Props>{
                                                 (m: any) => ({
                                                     ...m,
                                                     Actions: [
-                                                        <ActionButtons m={m} actionOnclick={actionOnclick} links={links} />,
+                                                        <ActionButtons m={m} actionOnclick={actionOnclick} links={{
+                                                            ...links,
+                                                            ...{ VIEW: links.VIEW('_TOOL_MANAGER') },
+                                                            ...{ EDIT: links.EDIT('_TOOL_MANAGER') },
+                                                            ...{ DELETE: links.DELETE('_TOOL_MANAGER') }
+                                                        }} />,
                                                     ],
                                                 }))
                                             ]}
@@ -184,7 +197,12 @@ export class ToolManagers extends React.PureComponent<Props>{
                                             onRenderRow={this._onRenderRow}
                                         />]
                                 },
-                                { type: 'NO_SHADOW', component: < NavButtons links={links} /> }
+                                {
+                                    type: 'NO_SHADOW', component: < NavButtons links={{
+                                        ...links,
+                                        ...{ ADD: links.ADD('_TOOL_MANAGER') }
+                                    }} />
+                                }
                             ]}
                         />
                     }
@@ -252,6 +270,7 @@ export class ToolManagers extends React.PureComponent<Props>{
 export class ActionButtons extends React.PureComponent<Props>{
     render() {
         const { actionOnclick, m, links } = this.props;
+        console.log('ActionButtons', this.props)
         return (
             <section >
                 <IconButton
@@ -268,7 +287,7 @@ export class ActionButtons extends React.PureComponent<Props>{
                     title="edit"
                     ariaLabel="edit"
                     onClick={() => {
-                        actionOnclick('edit', m)
+                        actionOnclick({ actionType: '!!!!!!!!!!!!!!!!!!!!!!!!!!!!edit', row: m })()
                         links.EDIT()
                     }}
                 />
@@ -339,8 +358,8 @@ export class NavButtons extends React.PureComponent<Props>{
                 />
                 <IconButton
                     iconProps={{ iconName: 'people' }}
-                    title="ContactGroups"
-                    ariaLabel="ContactGroups"
+                    title="groupDetails"
+                    ariaLabel="groupDetails"
                     onClick={links.GROUP_DETAILS}
                 // onClick={actionOnclick('edit', m)}
                 />
@@ -355,17 +374,23 @@ export class NavButtons extends React.PureComponent<Props>{
         )
     }
 }
-export class NewGroup extends React.PureComponent<Props>{
+export class Group extends React.PureComponent<Props>{
     render() {
-        const { links, textFields, viewOnly, groupDetails, title } = this.props;
+        const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails } = this.props;
+        console.log('!!!!!!!!!!!!!!Groups', this.props.groupDetails)
         return (
             <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
                 <h1 style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', width: '100%' }}>{title}</h1>
 
                 <div style={{ ...{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
                     <div style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, width: 260, ...{ margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
+                        {[
 
-                        {textFields.map((m: string) => <TextField label={m} disabled={viewOnly} defaultValue={groupDetails && groupDetails[m].value} />)}
+                            hasGroupDetails && groupDetails === undefined && <Spinner style={{ height: 335 }} size={SpinnerSize.large} />,
+                            (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
+                                return <TextField label={m} disabled={viewOnly} defaultValue={groupDetails && groupDetails[m]} />
+                            })
+                        ]}
 
 
                         <Button
