@@ -302,49 +302,36 @@ class App extends Component<any, any>{
                 viewOnly
               />
             ],
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             ADD_TOOL_MANAGER: [
               <Group
                 title={'New Group'}
-                links={this.state.links}
+                links={{
+                  ...this.state.links,
+                  BACK: this.state.links.TOOL_MANAGERS,
+                  EDIT: this.state.links.TOOL_MANAGERS
+                }}
                 textFields={['Tool Manager']}
               />],
 
             EDIT_TOOL_MANAGER: [
               <Group
                 title={'Edit Group'}
-                links={this.state.links}
+                links={{
+                  ...this.state.links,
+                  BACK: this.state.links.TOOL_MANAGERS,
+                  EDIT: this.state.links.TOOL_MANAGERS
+                }}
                 textFields={['Tool Manager']}
                 groupDetails={this.state.contactGroups}
               />],
             VIEW_TOOL_MANAGER: [
               <Group
                 title={'View Group'}
-                links={this.state.links}
+                links={{
+                  ...this.state.links,
+                  BACK: this.state.links.TOOL_MANAGERS,
+                  EDIT: this.state.links.EDIT('_TOOL_MANAGER')
+                }}
                 textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
               />]
           }[route]
