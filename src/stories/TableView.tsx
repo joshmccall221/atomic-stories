@@ -422,7 +422,9 @@ export class Group extends React.PureComponent<Props>{
                             text={viewOnly ? '' : 'OK'}
                             title={viewOnly ? 'EDIT' : "OK"}
                             ariaLabel={viewOnly ? 'EDIT' : "OK"}
-                            onClick={links.EDIT}
+                            onClick={() => {
+                                links.EDIT()
+                            }}
                         />
                         <Button
                             styles={{

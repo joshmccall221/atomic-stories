@@ -315,6 +315,7 @@ class App extends Component<any, any>{
             ],
             ADD_CONTACT_GROUP: [
               <Group
+                {...this.state}
                 title={'New Contact Group'}
                 links={{
                   ...this.state.links,
@@ -325,6 +326,7 @@ class App extends Component<any, any>{
             ],
             EDIT_CONTACT_GROUP: [
               <Group
+                {...this.state}
                 title={'Edit Contact Group'}
                 links={{
                   ...this.state.links,
@@ -339,11 +341,15 @@ class App extends Component<any, any>{
 
             VIEW_CONTACT_GROUP: [
               <Group
+                {...this.state}
                 title={'View Contact Group'}
                 links={{
                   ...this.state.links,
                   BACK: this.state.links.GROUP_DETAILS,
-                  EDIT: this.state.links.EDIT('_CONTACT_GROUP')
+                  EDIT: () => {
+                    this.state.links.EDIT('_CONTACT_GROUP')()
+                    this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id })
+                  }
                 }}
                 textFields={[
                   'Name',
@@ -360,6 +366,7 @@ class App extends Component<any, any>{
             ],
             ADD_TOOL_MANAGER: [
               <Group
+                {...this.state}
                 title={'New Group'}
                 links={{
                   ...this.state.links,
@@ -373,6 +380,7 @@ class App extends Component<any, any>{
 
             EDIT_TOOL_MANAGER: [
               <Group
+                {...this.state}
                 title={'Edit Group'}
                 links={{
                   ...this.state.links,
@@ -390,11 +398,15 @@ class App extends Component<any, any>{
               />],
             VIEW_TOOL_MANAGER: [
               <Group
+                {...this.state}
                 title={'View Group'}
                 links={{
                   ...this.state.links,
                   BACK: this.state.links.TOOL_MANAGERS,
-                  EDIT: this.state.links.EDIT('_TOOL_MANAGER')
+                  EDIT: () => {
+                    this.state.links.EDIT('_TOOL_MANAGER')()
+                    this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id })
+                  }
                 }}
                 textFields={[
                   'Tool Manager'
