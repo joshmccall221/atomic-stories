@@ -84,13 +84,9 @@ class App extends Component<any, any>{
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
-    const endpoint = endpoints({ contact, endpoint: 'apiSearchUser' });
-    return await adalApiFetch(axios,
-      endpoint,
-      // `${endpointBaseUrl}${endpoints({}).apiSearchUser}${contact}`,
-      enpointConfig)
-      .then(function (response: { data: { map: (arg0: (m: any) => any) => void; }; }) {
-        const people = response.data.map(m => ({
+    return await endpoints({ contact, endpoint: 'apiSearchUser' })
+      .then((response: any) => {
+        const people = response.data.map((m: any) => ({
           ...m,
           text: m.displayname,
           secondaryText: m.jobtitle,
@@ -104,78 +100,63 @@ class App extends Component<any, any>{
   }
 
   async apiContactGroupsIDDisplayName({ id }: any) {
-    const endpoint = endpoints({ id, endpoint: 'apiContactGroupsIDDisplayName' });
-    return await adalApiFetch(
-      axios,
-      endpoint,
-      // `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDDisplayName}`,
-      enpointConfig
-    ).then((response: { data: any; }) => {
-      const contactGroupDetails = [response.data].map(m => ({
-        ...m,
-        'Name': m.name,
-        'Primary Contact': m.primaryContact,
-        'Secondary Contact': m.secondaryContact,
-        'Leader': m.leader,
-        'OSS Name': m.ossName,
-        'OSS Contact': m.ossContact,
-        'Last Updated User': m.lastUpdatedUser,
-      }))[0];
-      this.setThings({
-        contactGroupDetails
+    return await endpoints({ id, endpoint: 'apiContactGroupsIDDisplayName' })
+      .then((response: { data: any; }) => {
+        const contactGroupDetails = [response.data].map(m => ({
+          ...m,
+          'Name': m.name,
+          'Primary Contact': m.primaryContact,
+          'Secondary Contact': m.secondaryContact,
+          'Leader': m.leader,
+          'OSS Name': m.ossName,
+          'OSS Contact': m.ossContact,
+          'Last Updated User': m.lastUpdatedUser,
+        }))[0];
+        this.setThings({
+          contactGroupDetails
+        });
+        console.log('contactGroupDetails', { contactGroupDetails })
+        return contactGroupDetails;
       });
-      console.log('contactGroupDetails', { contactGroupDetails })
-      return contactGroupDetails;
-    });
   }
   async apiContactGroupsIDAlias({ id }: any) {
-    const endpoint = endpoints({ id, endpoint: 'apiContactGroupsIDAlias' });
-    return await adalApiFetch(
-      axios,
-      endpoint,
-      // `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDAlias}`,
-      enpointConfig
-    ).then((response: { data: any; }) => {
-      const contactGroupDetails = [response.data].map(m => ({
-        ...m,
-        'Name': m.name,
-        'Primary Contact': m.primaryContact,
-        'Secondary Contact': m.secondaryContact,
-        'OSS Name': m.ossName,
-        'OSS Contact': m.ossContact,
-        'Leader': m.leader,
-        'Last Updated': m.lastUpdated,
-        'Owner': m.owner,
-        'Last Updated User': m.lastUpdatedUser,
-      }))[0];
-      this.setThings({
-        contactGroupDetails
+    return await endpoints({ id, endpoint: 'apiContactGroupsIDAlias' })
+      .then((response: { data: any; }) => {
+        const contactGroupDetails = [response.data].map(m => ({
+          ...m,
+          'Name': m.name,
+          'Primary Contact': m.primaryContact,
+          'Secondary Contact': m.secondaryContact,
+          'OSS Name': m.ossName,
+          'OSS Contact': m.ossContact,
+          'Leader': m.leader,
+          'Last Updated': m.lastUpdated,
+          'Owner': m.owner,
+          'Last Updated User': m.lastUpdatedUser,
+        }))[0];
+        this.setThings({
+          contactGroupDetails
+        });
+        console.log('contactGroupDetails', { contactGroupDetails })
+        return contactGroupDetails;
       });
-      console.log('contactGroupDetails', { contactGroupDetails })
-      return contactGroupDetails;
-    });
   }
 
   async apiSearchContactsLegal(contact: any) {
-    const endpoint = endpoints({ contact, endpoint: 'apiSearchContactsLegal' });
-    return await adalApiFetch(
-      axios,
-      endpoint,
-      enpointConfig
-    ).then(function (response: { data: any; }) {
-      const people = [response.data].map(m => ({
-        ...m,
-        text: m.displayname,
-        secondaryText: m.jobtitle,
-        imageUrl: m.picture
-      }));
-      return people;
-    });
+    return await endpoints({ contact, endpoint: 'apiSearchContactsLegal' })
+      .then(function (response: { data: any; }) {
+        const people = [response.data].map(m => ({
+          ...m,
+          text: m.displayname,
+          secondaryText: m.jobtitle,
+          imageUrl: m.picture
+        }));
+        return people;
+      });
   }
 
   async apiContactGroups() {
-    const endpoint = endpoints({ alias: authContext._user.userName, endpoint: 'apiContactGroups' });
-    return await adalApiFetch(axios, endpoint, enpointConfig)
+    return await endpoints({ alias: authContext._user.userName, endpoint: 'apiContactGroups' })
       .then((response: { data: any; }) => {
         console.log({ response })
         this.setState({
@@ -189,8 +170,7 @@ class App extends Component<any, any>{
   }
 
   async apiToolManagers() {
-    const endpoint = endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagers' });
-    return await adalApiFetch(axios, endpoint, enpointConfig)
+    return await endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagers' })
       .then((response: { data: any; }) => {
         console.log('apiToolManagers', { response })
         this.setState({
@@ -203,8 +183,7 @@ class App extends Component<any, any>{
       });
   }
   async isToolManager() {
-    const endpoint = endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagersAliasToolManager' });
-    return await adalApiFetch(axios, endpoint, enpointConfig)
+    return await endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagersAliasToolManager' })
       .then((response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
         console.log('apiToolManagersAliasToolManager', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
@@ -218,8 +197,7 @@ class App extends Component<any, any>{
       });
   }
   async apiToolManagersIDAlias({ id }: any) {
-    const endpoint = endpoints({ id, endpoint: 'apiToolManagersIDAlias' });
-    return await adalApiFetch(axios, endpoint, enpointConfig)
+    return await endpoints({ id, endpoint: 'apiToolManagersIDAlias' })
       .then((response: any) => {
         console.log('apiToolManagersIDAlias', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
@@ -240,8 +218,7 @@ class App extends Component<any, any>{
       });
   }
   async apiToolManagersIDDisplayName({ id }: any) {
-    const endpoint = endpoints({ id, endpoint: 'apiToolManagersIDDisplayName' });
-    return await adalApiFetch(axios, endpoint, enpointConfig)
+    return await endpoints({ id, endpoint: 'apiToolManagersIDDisplayName' })
       .then((response: any) => {
         console.log('apiToolManagersIDDisplayName', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
@@ -440,17 +417,21 @@ export default App;
 export const endpoints = ({ alias, id, endpoint, contact }: any) => {
 
   console.log(' ===== endpoints', { alias, id, endpoint })
-  return ({
-    apiContactGroups: `${endpointBaseUrl}/api/ContactGroups/`,
-    apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
-    apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
-    apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
-    apiSearchUser: `${endpointBaseUrl}/api/Search/Users/${contact}`,
-    apiToolManagers: `${endpointBaseUrl}/api/ToolManagers`,
-    apiToolManagersAliasToolManager: `${endpointBaseUrl}/api/ToolManagers/${alias}/ToolManager`,
-    apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/Alias`,
-    apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
-  })[endpoint];
+  return adalApiFetch(
+    axios,
+    ({
+      apiContactGroups: `${endpointBaseUrl}/api/ContactGroups/`,
+      apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
+      apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
+      apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
+      apiSearchUser: `${endpointBaseUrl}/api/Search/Users/${contact}`,
+      apiToolManagers: `${endpointBaseUrl}/api/ToolManagers`,
+      apiToolManagersAliasToolManager: `${endpointBaseUrl}/api/ToolManagers/${alias}/ToolManager`,
+      apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/Alias`,
+      apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
+    })[endpoint],
+    enpointConfig
+  );
 };
 
 export const endpointBaseUrl = `https://fyc-dev.azurewebsites.net`;
