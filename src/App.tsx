@@ -14,6 +14,8 @@ class App extends Component<any, any>{
       isToolManager: this.isToolManager(),
       contactGroups: [],
       contactGroupDetails: undefined,
+      apiSearchUsers: this.apiSearchUsers.bind(this),
+      apiSearchContactsLegal: this.apiSearchContactsLegal.bind(this),
       apiContactGroups: this.apiContactGroups.bind(this),
       apiToolManagers: this.apiToolManagers.bind(this),
       apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
@@ -68,26 +70,27 @@ class App extends Component<any, any>{
       .catch(function (error) {
         console.log({ error });
       });
-    this.apiSearchUsers(authContext._user.profile.name).then(people => {
-      const uniquePeople = people && people.map((m: { mail: any; }) => {
-        return { [m.mail]: m };
-      });
-      const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
-        return m[Object.keys(m)[0]];
-      });
-      this.setThings({
-        // peopleList: [...people]
-        peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
-        peopleList,
-        mostRecentlyUsed: peopleList
-      });
-      this.setThings({
-        currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
-          // Object.keys({'a': {'a':'b'}})[0]
+    this.apiSearchUsers(authContext._user.profile.name)
+      .then(people => {
+        const uniquePeople = people && people.map((m: { mail: any; }) => {
+          return { [m.mail]: m };
+        });
+        const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
           return m[Object.keys(m)[0]];
-        })
+        });
+        this.setThings({
+          // peopleList: [...people]
+          peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
+          peopleList,
+          mostRecentlyUsed: peopleList
+        });
+        this.setThings({
+          currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
+            // Object.keys({'a': {'a':'b'}})[0]
+            return m[Object.keys(m)[0]];
+          })
+        });
       });
-    });
 
     console.log({ authContext })
     // const apiToolManagersResult = () =>
@@ -99,7 +102,7 @@ class App extends Component<any, any>{
     this._isMounted = true;
   }
   setThings(state: any) {
-    console.log('setThingssetThingssetThings')
+    console.log('=====setThingssetThingssetThings', { state })
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
@@ -282,6 +285,67 @@ class App extends Component<any, any>{
                 {...this.state}
                 apiSearchUsers={this.apiSearchUsers.bind(this)}
                 apiSearchContactsLegal={this.apiSearchContactsLegal.bind(this)}
+                onRemoveItem={() => {
+                  this.state.setStateHandler({
+                    currentSelectedItems: [],
+                  })
+                }}
+                onItemSelected={(({ name }: { name?: any }) => (selectedItem?: any | undefined) => {
+
+                  this.state.setStateHandler({ contactList: undefined })
+                  selectedItem && this.state.setStateHandler({ currentSelectedItems: [selectedItem] })
+                  selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail']).then((data: any) => {
+
+                    console.log('onItemSelected', { name, selectedItem, props: this.state })
+                    this.state.setStateHandler({
+                      contactList: data,
+                      contactGroupDetails: {
+                        ...this.props.contactGroupDetails,
+                        [name]: data.mail
+
+                        // ...{
+                        //   "id": ADD ? uuidv1() : data.id,
+                        //   "name": data["Name"],
+                        //   "primaryContact": data["Primary Contact"],
+                        //   "secondaryContact": data["Secondary Contact"],
+                        //   "ossName": data["OSS Name"],
+                        //   "ossContact": data["OSS Contact"],
+                        //   "leader": data["Leader"],
+                        //   "lastUpdated": data["Last Updated"],
+                        //   "owner": data["Owner"],
+                        //   "lastUpdatedUser": data["Last Updated User"],
+                        // }
+                      }
+
+                      //             contactGroupDetails: {
+                      //                 ...this.props.contactGroupDetails,
+                      //                 ...{
+                      //     "primaryContact": data["Primary Contact"],
+                      //     "secondaryContact": data["Secondary Contact"],
+                      //     "ossName": data["OSS Name"],
+                      //     "ossContact": data["OSS Contact"],
+                      //     "leader": data["Leader"],
+                      //     "lastUpdated": new Date(),
+                      //     "owner": data["Owner"],
+                      //     "lastUpdatedUser": data["Last Updated User"],
+                      // },
+                      // ...{
+                      //     displayname: "Josh McCall",
+                      //     id: "96e741e8-17fa-4808-b50b-d3fc6fbbdabe",
+                      //     imageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA…",
+                      //     jobtitle: "SOFTWARE ENGINEER",
+                      //     mail: "jomccal@microsoft.com",
+                      //     officelocation: "MILLENNIUM A/1181",
+                      //     picture: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA…",
+                      //     secondaryText: "SOFTWARE ENGINEER",
+                      //     text: "Josh McCall",
+                      // }
+
+                    })
+
+                  })
+                  return selectedItem ? selectedItem : null
+                })({})}
               />
             ),
             TOOL_MANAGERS: [
@@ -481,7 +545,7 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
   )
     .then(thenFunc)
     .catch((error: any) => {
-      thenFunc()
+      // thenFunc()
       // this.state.apiContactGroups()
       // this.state.apiToolManagers()
       console.log({ error });

@@ -34,26 +34,14 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
 
 
     public render() {
+
         return (
             <>
                 <CompactPeoplePicker
                     selectedItems={this.props.currentSelectedItems}
-                    onItemSelected={(selectedItem?: any | undefined) => {
-
-                        this.props.setStateHandler({ contactList: undefined })
-                        selectedItem && this.props.setStateHandler({ currentSelectedItems: [selectedItem] })
-                        selectedItem && this.props.apiSearchContactsLegal((selectedItem as any)['mail']).then((r: any) => {
-
-                            this.props.setStateHandler({
-                                contactList: r
-
-                            })
-
-                        })
-                        return selectedItem ? selectedItem : null
-                    }}
+                    onItemSelected={(selectedItem?: any | undefined) => this.props.onItemSelected(selectedItem)}
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {
-                        debugger;
+                        // debugger;
                         return <PeoplePickerItem
                             styles={{
                                 root: {
@@ -66,12 +54,8 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                                 ValidationState: ValidationState.valid
                             }}
                             index={props.index}
-                            onRemoveItem={() => {
-                                this.props.setStateHandler({
-                                    currentSelectedItems: [],
-                                })
+                            onRemoveItem={this.props.onRemoveItem}
 
-                            }}
                         />
                     }}
 
@@ -88,6 +72,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                     inputProps={{
                         onChange: (props) => console.log('======onChange', { props }),
                         onBlur: () => console.log('onBlur called'),
+                        label: 'test',
                         onFocus: () => {
                             console.log('onFocus called', { ...this.props })
                             if (this.props.currentSelectedItems) {

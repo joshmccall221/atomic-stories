@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ShimmeredDetailsList, IDetailsRowProps, IDetailsRowStyles, DetailsRow, getTheme, IconButton, TextField, Button, Spinner, SpinnerSize } from 'office-ui-fabric-react';
-import { PersonProps } from './FindYourContact';
+import FindYourContact, { PersonProps } from './FindYourContact';
 const uuidv1 = require('uuid/v1');
 const { authContext } = require('../adalConfig');
 
@@ -386,10 +386,16 @@ export class NavButtons extends React.PureComponent<Props>{
 export class Group extends React.PureComponent<Props>{
     render() {
         const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails, ADD, CONTACT } = this.props;
-        console.log('!!!!!!!!!!!!!!Groups', this.props.contactGroupDetails)
+        console.log('!!!!!!!!!!!!!!Group', this.props)
         const onChange = (label: any) => (m: any) => {
             console.log('onChange', { label, m, groupDetails })
-            this.props.setStateHandler({ contactGroupDetails: { ...groupDetails, [label]: m } })
+            this.props.setStateHandler({
+                contactGroupDetails: {
+                    // ...groupDetails,
+                    ...this.props.contactGroupDetails,
+                    [label]: m
+                }
+            })
         }
         const onSave = ({ data }: any) => {
             console.log('onClick', { data })
@@ -437,15 +443,71 @@ export class Group extends React.PureComponent<Props>{
                             hasGroupDetails && groupDetails === undefined && <Spinner key={'spinner'} style={{ height: 335 }} size={SpinnerSize.large} />,
                             (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
                                 return [
-                                    <TextField
-                                        key={`TextField-${m}`}
-                                        label={m}
-                                        disabled={viewOnly}
-                                        onChange={(e, v) => onChange(m)(v)}
-                                        {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
-                                        {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
-                                    />,
-                                    <TextField
+                                    ADD
+                                    && !![
+                                        'Primary Contact',
+                                        'Secondary Contact',
+                                        'Leader',
+                                        'Owner',
+                                    ].filter(f => f === m).length
+
+                                    &&
+                                    <div style={{ margin: 5 }}>
+                                        <div style={{ width: '100%', margin: 5 }}>
+                                            {m}
+                                        </div>
+                                        <FindYourContact
+                                            {...this.props}
+                                            apiSearchUsers={this.props.apiSearchUsers}
+                                            apiSearchContactsLegal={this.props.apiSearchContactsLegal}
+                                            groups
+                                            title={m}
+                                            currentSelectedItems={this.props.currentSelectedItems && this.props.currentSelectedItems[m]}
+                                            onRemoveItem={(({ name }: any) => (selectedItem?: any | undefined) => {
+
+                                                console.log('onRemoveItem', { name, selectedItem, props: this.props })
+                                                selectedItem && this.props.setStateHandler({
+                                                    currentSelectedItems: { [name]: [] },
+                                                    contactGroupDetails: {
+                                                        ...this.props.contactGroupDetails,
+                                                        [name]: null
+                                                    }
+                                                })
+
+                                                return selectedItem ? selectedItem : null
+                                            })({ name: m })
+
+                                            }
+                                            onItemSelected={
+                                                (({ name }: any) => (selectedItem?: any | undefined) => {
+
+                                                    // this.props.setStateHandler({ contactList: undefined })
+                                                    console.log('onItemSelected', { name, selectedItem, props: this.props })
+                                                    selectedItem && this.props.setStateHandler({
+                                                        currentSelectedItems: { [name]: [selectedItem] },
+                                                        contactGroupDetails: {
+                                                            ...this.props.contactGroupDetails,
+                                                            [name]: selectedItem.mail
+                                                        }
+                                                    })
+
+                                                    return selectedItem ? selectedItem : null
+                                                })({ name: m })
+                                            }
+                                        />
+                                    </div>,
+
+                                    ![
+                                        'Primary Contact',
+                                        'Secondary Contact',
+                                        'Leader',
+                                        'Owner',
+                                    ].filter(f => f === m).length
+
+                                    && <TextField
+                                        styles={{
+                                            root: { width: 235, margin: 'auto' }
+                                        }}
                                         key={`TextField-${m}`}
                                         label={m}
                                         disabled={viewOnly}
