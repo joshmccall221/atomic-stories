@@ -444,7 +444,7 @@ export class Group extends React.PureComponent<Props>{
                             (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
                                 return [
                                     ADD
-                                    && !![
+                                    && [!![
                                         'Primary Contact',
                                         'Secondary Contact',
                                         'Leader',
@@ -453,53 +453,72 @@ export class Group extends React.PureComponent<Props>{
 
                                     ].filter(f => f === m).length
 
-                                    &&
-                                    <div style={{ margin: 5 }}>
-                                        <div style={{ width: '100%', margin: 5 }}>
-                                            {m}
-                                        </div>
-                                        <FindYourContact
-                                            {...this.props}
-                                            apiSearchUsers={this.props.apiSearchUsers}
-                                            apiSearchContactsLegal={this.props.apiSearchContactsLegal}
-                                            groups
-                                            title={m}
-                                            currentSelectedItems={this.props.currentSelectedItems && this.props.currentSelectedItems[m]}
-                                            onRemoveItem={(({ name }: any) => (selectedItem?: any | undefined) => {
+                                        &&
+                                        <div style={{ margin: 5 }}>
+                                            <div style={{ width: '100%', margin: 5 }}>
+                                                {m}
+                                            </div>
+                                            <FindYourContact
+                                                {...this.props}
+                                                apiSearchUsers={this.props.apiSearchUsers}
+                                                apiSearchContactsLegal={this.props.apiSearchContactsLegal}
+                                                groups
+                                                title={m}
+                                                currentSelectedItems={this.props.currentSelectedItems && this.props.currentSelectedItems[m]}
+                                                onRemoveItem={(({ name }: any) => (selectedItem?: any | undefined) => {
 
-                                                console.log('onRemoveItem', { name, selectedItem, props: this.props })
-                                                selectedItem && this.props.setStateHandler({
-                                                    currentSelectedItems: { [name]: [] },
-                                                    contactGroupDetails: {
-                                                        ...this.props.contactGroupDetails,
-                                                        [name]: null
-                                                    }
-                                                })
-
-                                                return selectedItem ? selectedItem : null
-                                            })({ name: m })
-
-                                            }
-                                            onItemSelected={
-                                                (({ name }: any) => (selectedItem?: any | undefined) => {
-
-                                                    // this.props.setStateHandler({ contactList: undefined })
-                                                    console.log('onItemSelected', { name, selectedItem, props: this.props })
+                                                    console.log('onRemoveItem', { name, selectedItem, props: this.props })
                                                     selectedItem && this.props.setStateHandler({
-                                                        currentSelectedItems: { [name]: [selectedItem] },
+                                                        currentSelectedItems: { [name]: [] },
                                                         contactGroupDetails: {
                                                             ...this.props.contactGroupDetails,
-                                                            [name]: selectedItem.mail
+                                                            [name]: null
                                                         }
                                                     })
 
                                                     return selectedItem ? selectedItem : null
                                                 })({ name: m })
-                                            }
-                                        />
-                                    </div>,
 
+                                                }
+                                                onItemSelected={
+                                                    (({ name }: any) => (selectedItem?: any | undefined) => {
+
+                                                        // this.props.setStateHandler({ contactList: undefined })
+                                                        console.log('onItemSelected', { name, selectedItem, props: this.props })
+                                                        selectedItem && this.props.setStateHandler({
+                                                            currentSelectedItems: { [name]: [selectedItem] },
+                                                            contactGroupDetails: {
+                                                                ...this.props.contactGroupDetails,
+                                                                [name]: selectedItem.mail
+                                                            }
+                                                        })
+
+                                                        return selectedItem ? selectedItem : null
+                                                    })({ name: m })
+                                                }
+                                            />
+                                        </div>,
+
+                                    ![
+                                        'Primary Contact',
+                                        'Secondary Contact',
+                                        'Leader',
+                                        'Owner',
+                                        'Tool Manager',
+                                    ].filter(f => f === m).length &&
                                     <TextField
+                                        styles={{
+                                            root: { width: 235, margin: 'auto' }
+                                        }}
+                                        key={`TextField-${m}`}
+                                        label={m}
+                                        disabled={viewOnly}
+                                        onChange={(e, v) => onChange(m)(v)}
+                                        {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
+                                        {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
+                                    />,
+                                    ],
+                                    !ADD && <TextField
                                         styles={{
                                             root: { width: 235, margin: 'auto' }
                                         }}
