@@ -84,8 +84,10 @@ class App extends Component<any, any>{
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
-    return await endpoints({ contact, endpoint: 'apiSearchUser' })
-      .then((response: any) => {
+    return await endpoints({
+      contact,
+      endpoint: 'apiSearchUser',
+      thenFunc: (response: any) => {
         const people = response.data.map((m: any) => ({
           ...m,
           text: m.displayname,
@@ -93,15 +95,15 @@ class App extends Component<any, any>{
           imageUrl: m.picture
         }));
         return people;
-      })
-      .catch(function (error: any) {
-        console.log({ error });
-      });
+      }
+    })
   }
 
   async apiContactGroupsIDDisplayName({ id }: any) {
-    return await endpoints({ id, endpoint: 'apiContactGroupsIDDisplayName' })
-      .then((response: { data: any; }) => {
+    return await endpoints({
+      id,
+      endpoint: 'apiContactGroupsIDDisplayName',
+      thenFunc: (response: { data: any; }) => {
         const contactGroupDetails = [response.data].map(m => ({
           ...m,
           'Name': m.name,
@@ -117,11 +119,14 @@ class App extends Component<any, any>{
         });
         console.log('contactGroupDetails', { contactGroupDetails })
         return contactGroupDetails;
-      });
+      }
+    })
   }
   async apiContactGroupsIDAlias({ id }: any) {
-    return await endpoints({ id, endpoint: 'apiContactGroupsIDAlias' })
-      .then((response: { data: any; }) => {
+    return await endpoints({
+      id,
+      endpoint: 'apiContactGroupsIDAlias',
+      thenFunc: (response: { data: any; }) => {
         const contactGroupDetails = [response.data].map(m => ({
           ...m,
           'Name': m.name,
@@ -139,12 +144,15 @@ class App extends Component<any, any>{
         });
         console.log('contactGroupDetails', { contactGroupDetails })
         return contactGroupDetails;
-      });
+      }
+    })
   }
 
   async apiSearchContactsLegal(contact: any) {
-    return await endpoints({ contact, endpoint: 'apiSearchContactsLegal' })
-      .then(function (response: { data: any; }) {
+    return await endpoints({
+      contact,
+      endpoint: 'apiSearchContactsLegal',
+      thenFunc: (response: { data: any; }) => {
         const people = [response.data].map(m => ({
           ...m,
           text: m.displayname,
@@ -152,53 +160,55 @@ class App extends Component<any, any>{
           imageUrl: m.picture
         }));
         return people;
-      });
+      }
+    })
   }
 
   async apiContactGroups() {
-    return await endpoints({ alias: authContext._user.userName, endpoint: 'apiContactGroups' })
-      .then((response: { data: any; }) => {
+    return await endpoints({
+      alias: authContext._user.userName,
+      endpoint: 'apiContactGroups',
+      thenFunc: (response: { data: any; }) => {
         console.log({ response })
         this.setState({
           contactGroups: response.data
         });
         return response.data;
-      })
-      .catch(function (error: any) {
-        console.log({ error });
-      });
+      }
+    })
   }
 
   async apiToolManagers() {
-    return await endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagers' })
-      .then((response: { data: any; }) => {
+    return await endpoints({
+      alias: authContext._user.userName,
+      endpoint: 'apiToolManagers',
+      thenFunc: (response: { data: any; }) => {
         console.log('apiToolManagers', { response })
         this.setState({
           toolManagers: response.data
         });
         return response.data;
-      })
-      .catch(function (error: any) {
-        console.log({ error });
-      });
+      }
+    })
   }
   async isToolManager() {
-    return await endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagersAliasToolManager' })
-      .then((response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
+    return await endpoints({
+      alias: authContext._user.userName,
+      endpoint: 'apiToolManagersAliasToolManager',
+      thenFunc: (response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
         console.log('apiToolManagersAliasToolManager', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
         this.setState({
           isToolManager: response.data
         });
         return response.data;
-      })
-      .catch(function (error: any) {
-        console.log({ error });
-      });
+      }
+    })
   }
   async apiToolManagersIDAlias({ id }: any) {
-    return await endpoints({ id, endpoint: 'apiToolManagersIDAlias' })
-      .then((response: any) => {
+    return await endpoints({
+      id, endpoint: 'apiToolManagersIDAlias',
+      thenFunc: (response: any) => {
         console.log('apiToolManagersIDAlias', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
         const contactGroupDetails = [response.data].map(m => ({
@@ -212,14 +222,14 @@ class App extends Component<any, any>{
           contactGroupDetails
         });
         return response.data;
-      })
-      .catch(function (error: any) {
-        console.log({ error });
-      });
+      }
+    })
   }
   async apiToolManagersIDDisplayName({ id }: any) {
-    return await endpoints({ id, endpoint: 'apiToolManagersIDDisplayName' })
-      .then((response: any) => {
+    return await endpoints({
+      id,
+      endpoint: 'apiToolManagersIDDisplayName',
+      thenFunc: (response: any) => {
         console.log('apiToolManagersIDDisplayName', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
         const contactGroupDetails = [response.data].map(m => ({
@@ -233,10 +243,8 @@ class App extends Component<any, any>{
           contactGroupDetails
         });
         return response.data;
-      })
-      .catch(function (error: any) {
-        console.log({ error });
-      });
+      }
+    })
   }
   render() {
     const { route } = this.state;
@@ -414,7 +422,7 @@ class App extends Component<any, any>{
 
 export default App;
 
-export const endpoints = ({ alias, id, endpoint, contact }: any) => {
+export const endpoints = ({ alias, id, endpoint, contact, thenFunc }: any) => {
 
   console.log(' ===== endpoints', { alias, id, endpoint })
   return adalApiFetch(
@@ -431,7 +439,11 @@ export const endpoints = ({ alias, id, endpoint, contact }: any) => {
       apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
     })[endpoint],
     enpointConfig
-  );
+  )
+    .then(thenFunc)
+    .catch(function (error: any) {
+      console.log({ error });
+    });
 };
 
 export const endpointBaseUrl = `https://fyc-dev.azurewebsites.net`;
