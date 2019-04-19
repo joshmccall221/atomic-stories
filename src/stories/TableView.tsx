@@ -102,7 +102,7 @@ export default class extends React.PureComponent<Props>{
                                                 root: {
                                                 }
                                             }}
-                                            items={[...contactList.map(
+                                            items={[...contactList && contactList.map(
                                                 (m: any) => ({
                                                     ...m,
                                                     Actions: [
@@ -385,6 +385,14 @@ export class Group extends React.PureComponent<Props>{
     render() {
         const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails } = this.props;
         console.log('!!!!!!!!!!!!!!Groups', this.props.groupDetails)
+        const onChange = (label: any) => (m: any) => {
+            console.log('onChange', { label, m, groupDetails })
+            this.props.setStateHandler({ contactGroupDetails: { ...groupDetails, [label]: m } })
+        }
+        const onSave = () => {
+            console.log('onClick', { groupDetails })
+            this.props.post({ id: groupDetails.id, data: this.props.groupDetails })
+        }
         return (
             <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
                 <h1 style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', width: '100%' }}>{title}</h1>
@@ -399,6 +407,7 @@ export class Group extends React.PureComponent<Props>{
                                     key={`TextField-${m}`}
                                     label={m}
                                     disabled={viewOnly}
+                                    onChange={(e, v) => onChange(m)(v)}
                                     {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
                                     {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
                                 // defaultValue={groupDetails && groupDetails[m]}
@@ -426,7 +435,12 @@ export class Group extends React.PureComponent<Props>{
                             title={viewOnly ? 'EDIT' : "OK"}
                             ariaLabel={viewOnly ? 'EDIT' : "OK"}
                             onClick={() => {
+                                // console.log('onClick', { groupDetails })
+                                // this.props.post({ id: groupDetails.id, data: groupDetails })
+                                this.props.setStateHandler({ contactGroups: [] })
+                                onSave()
                                 links.EDIT()
+
                             }}
                         />
                         <Button

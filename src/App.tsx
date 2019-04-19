@@ -12,12 +12,35 @@ class App extends Component<any, any>{
     this.state = {
       setStateHandler: this.setThings.bind(this),
       isToolManager: this.isToolManager(),
-      contactGroups: [this.apiContactGroups()],
+      contactGroups: [],
       contactGroupDetails: undefined,
+      apiContactGroups: this.apiContactGroups.bind(this),
       apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
       apiContactGroupsIDDisplayName: this.apiContactGroupsIDDisplayName.bind(this),
       apiToolManagersIDAlias: this.apiToolManagersIDAlias.bind(this),
       apiToolManagersIDDisplayName: this.apiToolManagersIDDisplayName.bind(this),
+      post: ({ id, data }: any) => {
+        console.log('post', { id, data })
+        endpoints({
+          id,
+          endpoint: 'apiContactGroups',
+          method: 'PUT',
+          data: {
+            "id": data.id,
+            "name": data.Name,
+            "primaryContact": data["Primary Contact"],
+            "secondaryContact": data["Secondary Contact"],
+            "ossName": data["OSS Name"],
+            "ossContact": data["OSS Contact"],
+            "leader": data["Leader"],
+            "lastUpdated": data["Last Updated"],
+            "owner": data["Owner"],
+            "lastUpdatedUser": data["Last Updated User"],
+          },
+          thenFunc: () => this.apiContactGroups()
+
+        })
+      },
       toolManagers: [this.apiToolManagers()],
       delayResults: true,
       peopleList: [],
@@ -36,6 +59,7 @@ class App extends Component<any, any>{
         DELETE: (param: any) => () => console.log('DELETE'),
       }
     };
+    this.apiContactGroups()
     this.setThings = this.setThings.bind(this);
     this._isMounted = false;
     this.apiSearchContactsLegal(authContext._user.userName)
@@ -101,6 +125,9 @@ class App extends Component<any, any>{
   }
 
   async apiContactGroupsIDDisplayName({ id }: any) {
+    this.setThings({
+      contactGroupDetails: []
+    });
     return await endpoints({
       id,
       endpoint: 'apiContactGroupsIDDisplayName',
@@ -284,7 +311,7 @@ class App extends Component<any, any>{
             ],
             GROUP_DETAILS: [
               <ContactGroup
-                title={"Contact Group"}
+                title={"Contact Groups"}
                 {...this.state}
                 links={{
                   ...this.state.links,
@@ -299,7 +326,7 @@ class App extends Component<any, any>{
                   ]
                 }
                 contactList={
-                  this.state.contactGroups.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
+                  this.state.contactGroups && this.state.contactGroups.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
                     Name: m.name,
                     Primary: m.primaryContact,
                     Secondary: m.secondaryContact,
@@ -330,7 +357,11 @@ class App extends Component<any, any>{
                 links={{
                   ...this.state.links,
                   BACK: this.state.links.GROUP_DETAILS,
-                  EDIT: this.state.links.GROUP_DETAILS,
+                  EDIT: () => {
+
+                    this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id })
+                    this.state.links.GROUP_DETAILS()
+                  },
                 }}
 
                 textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
@@ -347,7 +378,7 @@ class App extends Component<any, any>{
                   BACK: this.state.links.GROUP_DETAILS,
                   EDIT: () => {
                     this.state.links.EDIT('_CONTACT_GROUP')()
-                    this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id })
+                    this.state.apiContactGroupsIDDisplayName({ id: this.state.contactGroupDetails.id })
                   }
                 }}
                 textFields={[
@@ -428,13 +459,16 @@ class App extends Component<any, any>{
 
 export default App;
 
-export const endpoints = ({ alias, id, endpoint, contact, thenFunc }: any) => {
-
-  console.log(' ===== endpoints', { alias, id, endpoint })
+export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data }: any) => {
+  const config = {
+    method: method ? method : 'GET',
+    data
+  }; //enpointConfig({ method: 'GET' })
+  console.log(' ===== endpoints', { alias, id, endpoint, config })
   return adalApiFetch(
     axios,
     ({
-      apiContactGroups: `${endpointBaseUrl}/api/ContactGroups/`,
+      apiContactGroups: id ? `${endpointBaseUrl}/api/ContactGroups/${id}` : `${endpointBaseUrl}/api/ContactGroups/`,
       apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
       apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
       apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
@@ -444,7 +478,7 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc }: any) => {
       apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/Alias`,
       apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
     })[endpoint],
-    enpointConfig
+    config
   )
     .then(thenFunc)
     .catch(function (error: any) {
@@ -457,7 +491,7 @@ export const endpointBaseUrl = `https://fyc-dev.azurewebsites.net`;
 //   ? `https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net`
 //   : `https://fyc-dev.azurewebsites.net`;
 
-export const enpointConfig = { method: 'GET' };
+export const enpointConfig = ({ method }: any) => { method };
 class ErrorBoundary extends React.Component<any, any> {
   constructor(props: any) {
     super(props);

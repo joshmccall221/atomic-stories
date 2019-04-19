@@ -26,7 +26,7 @@ export default class extends BaseComponent<FindYourContactProps> {
         return (
             <>
 
-                <Layout title={'Find Your Legal Contacts'} >
+                <Layout title={'CELA Contacts'} >
                     <Shadow
                         childrenComponents={[
                             {
