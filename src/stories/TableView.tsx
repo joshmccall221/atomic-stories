@@ -11,7 +11,7 @@ export class Shadow extends React.PureComponent<Props>{
             return ({
                 SHADOW: () =>
 
-                    <div style={{ ...{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
+                    <div key={'shadowComponent'} style={{ ...{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
                         <div style={{
                             border: '1px solid #e5e5e5',
                             boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
@@ -26,7 +26,7 @@ export class Shadow extends React.PureComponent<Props>{
                         {/* {m.component} */}
                         {m.component.map((m: any) => {
                             return <>
-                                <div style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, margin: '2em', width: 260, display: 'inline-block', textAlign: 'center' }}>
+                                <div key={`doubleShadowComponent-${m.id}`} style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, margin: '2em', width: 260, display: 'inline-block', textAlign: 'center' }}>
                                     <div style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', }}>
                                         <div style={{ textAlign: 'center', paddingTop: 20 }}>
                                             {m}
@@ -40,7 +40,7 @@ export class Shadow extends React.PureComponent<Props>{
                 NO_SHADOW: () => m.component,
                 FOOTER: () =>
 
-                    <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' }}>
+                    <div key={`noShadowComponent-${m.id}`} style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' }}>
                         {m.component}
                     </div>
             })[type || m.type]()
@@ -310,7 +310,7 @@ export class ActionButtons extends React.PureComponent<Props>{
                     title="read"
                     ariaLabel="read"
                     onClick={() => {
-                        actionOnclick('read', m)
+                        // actionOnclick('read', m)
                         actionOnclick({ actionType: 'VIEW', row: m })()
                         links.VIEW()
                     }}
@@ -329,7 +329,7 @@ export class ActionButtons extends React.PureComponent<Props>{
                     title="delete"
                     ariaLabel="delete"
                     onClick={() => {
-                        actionOnclick('delete', m)
+                        // actionOnclick('delete', m)
                         actionOnclick({ actionType: 'DELETE', row: m })()
                         links.DELETE()
                     }}
@@ -393,9 +393,10 @@ export class Group extends React.PureComponent<Props>{
                     <div style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, width: 260, ...{ margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
                         {[
 
-                            hasGroupDetails && groupDetails === undefined && <Spinner style={{ height: 335 }} size={SpinnerSize.large} />,
+                            hasGroupDetails && groupDetails === undefined && <Spinner key={'spinner'} style={{ height: 335 }} size={SpinnerSize.large} />,
                             (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
                                 return <TextField
+                                    key={`TextField-${m}`}
                                     label={m}
                                     disabled={viewOnly}
                                     {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}

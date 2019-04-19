@@ -21,8 +21,8 @@ export class PersonaBadge extends React.Component<PersonProps> {
                 <h1 style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.2, fontFamily: 'arial', }}>{person && person.text}</h1>
                 <p style={{ color: 'grey', fontSize: 13, fontFamily: 'arial' }} >{person && person.secondaryText}</p>
                 <a
-                    title={`Send email to: ` + (person as any).mail}
-                    href={'Send E-Mail'}>
+                    title={'Send E-Mail'}
+                    href={`mailto:${(person as any).mail}`}>
                     <PrimaryButton
                         text={"Contact"}
                         data-automation-id="test"

@@ -10,7 +10,7 @@ class App extends Component<any, any>{
   constructor(props: Readonly<{}>) {
     super(props);
     this.state = {
-      setStateHandler: this.setThings,
+      setStateHandler: this.setThings.bind(this),
       isToolManager: this.isToolManager(),
       contactGroups: [this.apiContactGroups()],
       contactGroupDetails: undefined,
@@ -81,6 +81,7 @@ class App extends Component<any, any>{
     this._isMounted = true;
   }
   setThings(state: any) {
+    console.log('setThingssetThingssetThings')
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
