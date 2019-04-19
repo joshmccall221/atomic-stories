@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { ShimmeredDetailsList, IDetailsRowProps, IDetailsRowStyles, DetailsRow, getTheme, IconButton, TextField, Button, Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import { PersonProps } from './FindYourContact';
+const uuidv1 = require('uuid/v1');
+const { authContext } = require('../adalConfig');
 
 export type Props = { contactList: PersonProps[]; } & any;
 
@@ -383,15 +385,46 @@ export class NavButtons extends React.PureComponent<Props>{
 }
 export class Group extends React.PureComponent<Props>{
     render() {
-        const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails } = this.props;
-        console.log('!!!!!!!!!!!!!!Groups', this.props.groupDetails)
+        const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails, ADD, CONTACT } = this.props;
+        console.log('!!!!!!!!!!!!!!Groups', this.props.contactGroupDetails)
         const onChange = (label: any) => (m: any) => {
             console.log('onChange', { label, m, groupDetails })
             this.props.setStateHandler({ contactGroupDetails: { ...groupDetails, [label]: m } })
         }
-        const onSave = () => {
-            console.log('onClick', { groupDetails })
-            this.props.post({ id: groupDetails.id, data: this.props.groupDetails })
+        const onSave = ({ data }: any) => {
+            console.log('onClick', { data })
+            this.props.post(
+                {
+                    id: ADD ? uuidv1() : data.id,
+                    data: CONTACT ? {
+                        "id": ADD ? uuidv1() : data.id,
+                        "name": data["Name"],
+                        "primaryContact": data["Primary Contact"],
+                        "secondaryContact": data["Secondary Contact"],
+                        "ossName": data["OSS Name"],
+                        "ossContact": data["OSS Contact"],
+                        "leader": data["Leader"],
+                        "lastUpdated": data["Last Updated"],
+                        "owner": data["Owner"],
+                        "lastUpdatedUser": data["Last Updated User"],
+                    } :
+                        {
+                            id: ADD ? uuidv1() : data.id,
+                            "toolManager": "harezk@microsoft.com",
+                            "addedBy": authContext._user.userName,
+                            "lastUpdated": new Date(),
+                            "lastUpdatedBy": authContext._user.userName
+                        }
+                    ,
+                    endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
+                })
+            this.props.setStateHandler({
+                contactGroups: [],
+                groupDetails: [],
+                toolManagers: []
+            })
+            // this.props.apiContactGroups()
+            // this.props.apiToolManagers()
         }
         return (
             <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
@@ -403,15 +436,24 @@ export class Group extends React.PureComponent<Props>{
 
                             hasGroupDetails && groupDetails === undefined && <Spinner key={'spinner'} style={{ height: 335 }} size={SpinnerSize.large} />,
                             (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
-                                return <TextField
-                                    key={`TextField-${m}`}
-                                    label={m}
-                                    disabled={viewOnly}
-                                    onChange={(e, v) => onChange(m)(v)}
-                                    {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
-                                    {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
-                                // defaultValue={groupDetails && groupDetails[m]}
-                                />
+                                return [
+                                    <TextField
+                                        key={`TextField-${m}`}
+                                        label={m}
+                                        disabled={viewOnly}
+                                        onChange={(e, v) => onChange(m)(v)}
+                                        {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
+                                        {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
+                                    />,
+                                    <TextField
+                                        key={`TextField-${m}`}
+                                        label={m}
+                                        disabled={viewOnly}
+                                        onChange={(e, v) => onChange(m)(v)}
+                                        {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
+                                        {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
+                                    />,
+                                ]
                             })
                         ]}
 
@@ -435,10 +477,10 @@ export class Group extends React.PureComponent<Props>{
                             title={viewOnly ? 'EDIT' : "OK"}
                             ariaLabel={viewOnly ? 'EDIT' : "OK"}
                             onClick={() => {
-                                // console.log('onClick', { groupDetails })
+                                console.log('onClick', this.props.contactGroupDetails)
                                 // this.props.post({ id: groupDetails.id, data: groupDetails })
-                                this.props.setStateHandler({ contactGroups: [] })
-                                onSave()
+
+                                onSave({ data: this.props.contactGroupDetails })
                                 links.EDIT()
 
                             }}

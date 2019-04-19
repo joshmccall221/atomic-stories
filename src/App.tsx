@@ -15,29 +15,22 @@ class App extends Component<any, any>{
       contactGroups: [],
       contactGroupDetails: undefined,
       apiContactGroups: this.apiContactGroups.bind(this),
+      apiToolManagers: this.apiToolManagers.bind(this),
       apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
       apiContactGroupsIDDisplayName: this.apiContactGroupsIDDisplayName.bind(this),
       apiToolManagersIDAlias: this.apiToolManagersIDAlias.bind(this),
       apiToolManagersIDDisplayName: this.apiToolManagersIDDisplayName.bind(this),
-      post: ({ id, data }: any) => {
+      post: ({ id, data, endpoint, method }: any) => {
         console.log('post', { id, data })
         endpoints({
           id,
-          endpoint: 'apiContactGroups',
-          method: 'PUT',
-          data: {
-            "id": data.id,
-            "name": data.Name,
-            "primaryContact": data["Primary Contact"],
-            "secondaryContact": data["Secondary Contact"],
-            "ossName": data["OSS Name"],
-            "ossContact": data["OSS Contact"],
-            "leader": data["Leader"],
-            "lastUpdated": data["Last Updated"],
-            "owner": data["Owner"],
-            "lastUpdatedUser": data["Last Updated User"],
-          },
-          thenFunc: () => this.apiContactGroups()
+          endpoint,
+          method,
+          data,
+          thenFunc: () => {
+            this.apiContactGroups()
+            this.apiToolManagers()
+          }
 
         })
       },
@@ -96,6 +89,7 @@ class App extends Component<any, any>{
       });
     });
 
+    console.log({ authContext })
     // const apiToolManagersResult = () =>
   }
   componentWillUnmount() {
@@ -348,7 +342,10 @@ class App extends Component<any, any>{
                   BACK: this.state.links.GROUP_DETAILS,
                   EDIT: this.state.links.GROUP_DETAILS,
                 }}
-                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} />
+                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+                CONTACT
+                ADD
+              />
             ],
             EDIT_CONTACT_GROUP: [
               <Group
@@ -367,6 +364,7 @@ class App extends Component<any, any>{
                 textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
                 groupDetails={this.state.contactGroupDetails}
                 hasGroupDetails
+                CONTACT
               />],
 
             VIEW_CONTACT_GROUP: [
@@ -409,6 +407,7 @@ class App extends Component<any, any>{
                 textFields={[
                   'Tool Manager'
                 ]}
+                ADD
               />],
 
             EDIT_TOOL_MANAGER: [
@@ -468,7 +467,7 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
   return adalApiFetch(
     axios,
     ({
-      apiContactGroups: id ? `${endpointBaseUrl}/api/ContactGroups/${id}` : `${endpointBaseUrl}/api/ContactGroups/`,
+      apiContactGroups: `${endpointBaseUrl}/api/ContactGroups/`,
       apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
       apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
       apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
@@ -481,7 +480,10 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
     config
   )
     .then(thenFunc)
-    .catch(function (error: any) {
+    .catch((error: any) => {
+      thenFunc()
+      // this.state.apiContactGroups()
+      // this.state.apiToolManagers()
       console.log({ error });
     });
 };

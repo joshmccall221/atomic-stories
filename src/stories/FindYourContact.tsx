@@ -70,6 +70,8 @@ export default class extends BaseComponent<FindYourContactProps> {
                                         ariaLabel="Management"
                                         onClick={() => {
                                             console.log('settings onclick')
+                                            this.props.apiContactGroups()
+                                            this.props.apiToolManagers()
                                             links.GROUP_DETAILS()
                                         }}
                                     />
