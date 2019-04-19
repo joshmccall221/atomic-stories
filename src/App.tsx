@@ -429,6 +429,7 @@ class App extends Component<any, any>{
                 groupDetails={this.state.contactGroupDetails}
                 hasGroupDetails
                 CONTACT
+                ADD
               />],
 
             VIEW_CONTACT_GROUP: [
@@ -488,9 +489,9 @@ class App extends Component<any, any>{
                 }}
                 textFields={[
                   'Tool Manager'
-
                 ]}
                 groupDetails={this.state.contactGroupDetails}
+                ADD
               />],
             VIEW_TOOL_MANAGER: [
               <Group

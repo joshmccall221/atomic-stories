@@ -449,6 +449,8 @@ export class Group extends React.PureComponent<Props>{
                                         'Secondary Contact',
                                         'Leader',
                                         'Owner',
+                                        'Tool Manager',
+
                                     ].filter(f => f === m).length
 
                                     &&
@@ -497,14 +499,7 @@ export class Group extends React.PureComponent<Props>{
                                         />
                                     </div>,
 
-                                    ![
-                                        'Primary Contact',
-                                        'Secondary Contact',
-                                        'Leader',
-                                        'Owner',
-                                    ].filter(f => f === m).length
-
-                                    && <TextField
+                                    <TextField
                                         styles={{
                                             root: { width: 235, margin: 'auto' }
                                         }}
