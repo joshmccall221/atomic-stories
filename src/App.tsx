@@ -84,7 +84,11 @@ class App extends Component<any, any>{
     this._isMounted && this.setState(state);
   }
   async apiSearchUsers(contact: any) {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiSearchUser}${contact}`, enpointConfig)
+    const endpoint = endpoints({ contact, endpoint: 'apiSearchUser' });
+    return await adalApiFetch(axios,
+      endpoint,
+      // `${endpointBaseUrl}${endpoints({}).apiSearchUser}${contact}`,
+      enpointConfig)
       .then(function (response: { data: { map: (arg0: (m: any) => any) => void; }; }) {
         const people = response.data.map(m => ({
           ...m,
@@ -100,9 +104,11 @@ class App extends Component<any, any>{
   }
 
   async apiContactGroupsIDDisplayName({ id }: any) {
+    const endpoint = endpoints({ id, endpoint: 'apiContactGroupsIDDisplayName' });
     return await adalApiFetch(
       axios,
-      `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDDisplayName}`,
+      endpoint,
+      // `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDDisplayName}`,
       enpointConfig
     ).then((response: { data: any; }) => {
       const contactGroupDetails = [response.data].map(m => ({
@@ -123,9 +129,11 @@ class App extends Component<any, any>{
     });
   }
   async apiContactGroupsIDAlias({ id }: any) {
+    const endpoint = endpoints({ id, endpoint: 'apiContactGroupsIDAlias' });
     return await adalApiFetch(
       axios,
-      `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDAlias}`,
+      endpoint,
+      // `${endpointBaseUrl}${endpoints({ id }).apiContactGroupsIDAlias}`,
       enpointConfig
     ).then((response: { data: any; }) => {
       const contactGroupDetails = [response.data].map(m => ({
@@ -149,9 +157,10 @@ class App extends Component<any, any>{
   }
 
   async apiSearchContactsLegal(contact: any) {
+    const endpoint = endpoints({ contact, endpoint: 'apiSearchContactsLegal' });
     return await adalApiFetch(
       axios,
-      `${endpointBaseUrl}${endpoints({}).apiSearchContactsLegal}${contact}`,
+      endpoint,
       enpointConfig
     ).then(function (response: { data: any; }) {
       const people = [response.data].map(m => ({
@@ -165,7 +174,8 @@ class App extends Component<any, any>{
   }
 
   async apiContactGroups() {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiContactGroups}`, enpointConfig)
+    const endpoint = endpoints({ alias: authContext._user.userName, endpoint: 'apiContactGroups' });
+    return await adalApiFetch(axios, endpoint, enpointConfig)
       .then((response: { data: any; }) => {
         console.log({ response })
         this.setState({
@@ -179,7 +189,8 @@ class App extends Component<any, any>{
   }
 
   async apiToolManagers() {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({}).apiToolManagers}`, enpointConfig)
+    const endpoint = endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagers' });
+    return await adalApiFetch(axios, endpoint, enpointConfig)
       .then((response: { data: any; }) => {
         console.log('apiToolManagers', { response })
         this.setState({
@@ -192,7 +203,8 @@ class App extends Component<any, any>{
       });
   }
   async isToolManager() {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({ alias: authContext._user.userName }).apiToolManagersAliasToolManager}`, enpointConfig)
+    const endpoint = endpoints({ alias: authContext._user.userName, endpoint: 'apiToolManagersAliasToolManager' });
+    return await adalApiFetch(axios, endpoint, enpointConfig)
       .then((response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
         console.log('apiToolManagersAliasToolManager', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
@@ -206,7 +218,8 @@ class App extends Component<any, any>{
       });
   }
   async apiToolManagersIDAlias({ id }: any) {
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoints({ id }).apiToolManagersIDAlias}`, enpointConfig)
+    const endpoint = endpoints({ id, endpoint: 'apiToolManagersIDAlias' });
+    return await adalApiFetch(axios, endpoint, enpointConfig)
       .then((response: any) => {
         console.log('apiToolManagersIDAlias', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
@@ -227,9 +240,8 @@ class App extends Component<any, any>{
       });
   }
   async apiToolManagersIDDisplayName({ id }: any) {
-    const endpoint = endpoints({ id }).apiToolManagersIDDisplayName;
-    console.log('apiToolManagersIDDisplayName', { id, endpoint })
-    return await adalApiFetch(axios, `${endpointBaseUrl}${endpoint}`, enpointConfig)
+    const endpoint = endpoints({ id, endpoint: 'apiToolManagersIDDisplayName' });
+    return await adalApiFetch(axios, endpoint, enpointConfig)
       .then((response: any) => {
         console.log('apiToolManagersIDDisplayName', { authContext, response })
         //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
@@ -249,7 +261,6 @@ class App extends Component<any, any>{
         console.log({ error });
       });
   }
-
   render() {
     const { route } = this.state;
     console.log('=========route', { route })
@@ -385,7 +396,10 @@ class App extends Component<any, any>{
                 links={{
                   ...this.state.links,
                   BACK: this.state.links.TOOL_MANAGERS,
-                  EDIT: this.state.links.TOOL_MANAGERS
+                  EDIT: () => {
+                    this.state.links.TOOL_MANAGERS()
+                    this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id })
+                  }
                 }}
                 textFields={[
                   'Tool Manager',
@@ -423,20 +437,20 @@ class App extends Component<any, any>{
 
 export default App;
 
-export const endpoints = (params: any) => {
-  const { alias, id } = params;
+export const endpoints = ({ alias, id, endpoint, contact }: any) => {
+
+  console.log(' ===== endpoints', { alias, id, endpoint })
   return ({
-    apiContactGroups: '/api/ContactGroups/',
-    apiContactGroupsIDAlias: `/api/ContactGroups/${id}/alias`,
-    apiContactGroupsIDDisplayName: `/api/ContactGroups/${id}/DisplayName`,
-    apiSearchContactsLegal: '/api/Search/Contacts/Legal/',
-    apiSearchContactsOSS: '/api/Search/Contacts/OSS/',
-    apiSearchUser: '/api/Search/Users/',
-    apiToolManagers: '/api/ToolManagers',
-    apiToolManagersAliasToolManager: `/api/ToolManagers/${alias}/ToolManager`,
-    apiToolManagersIDAlias: `/api/ToolManagers/${id}/Alias`,
-    apiToolManagersIDDisplayName: `/api/ToolManagers/${id}/DisplayName`,
-  });
+    apiContactGroups: `${endpointBaseUrl}/api/ContactGroups/`,
+    apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
+    apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
+    apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
+    apiSearchUser: `${endpointBaseUrl}/api/Search/Users/${contact}`,
+    apiToolManagers: `${endpointBaseUrl}/api/ToolManagers`,
+    apiToolManagersAliasToolManager: `${endpointBaseUrl}/api/ToolManagers/${alias}/ToolManager`,
+    apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/Alias`,
+    apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
+  })[endpoint];
 };
 
 export const endpointBaseUrl = `https://fyc-dev.azurewebsites.net`;

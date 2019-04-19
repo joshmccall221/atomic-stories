@@ -398,7 +398,9 @@ export class Group extends React.PureComponent<Props>{
                                 return <TextField
                                     label={m}
                                     disabled={viewOnly}
-                                    placeholder={groupDetails && groupDetails[m]}
+                                    {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
+                                    {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
+                                // defaultValue={groupDetails && groupDetails[m]}
                                 />
                             })
                         ]}
