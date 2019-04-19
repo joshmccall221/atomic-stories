@@ -160,7 +160,7 @@ export class ToolManagers extends React.PureComponent<Props>{
         const { contactList, links } = this.props;
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
             console.log('ToolManagersactionOnclick', { props: this.props, actionType, row, id: row.id })
-            this.props.setStateHandler('ToolManagersactionOnclick', { contactGroupDetails: undefined })
+            this.props.setStateHandler({ contactGroupDetails: undefined })
             return ({
                 VIEW: () => this.props.apiToolManagersIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiToolManagersIDAlias({ id: row.id }),

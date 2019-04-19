@@ -23,7 +23,7 @@ class App extends Component<any, any>{
       peopleList: [],
       mostRecentlyUsed: [],
       currentSelectedItems: [],
-      contactList: [],
+      contactList: undefined,
       route: 'FindYourContact',
       links: {
         HOME: () => this.setState({ route: 'FindYourContact' }),

@@ -40,10 +40,14 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                     selectedItems={this.props.currentSelectedItems}
                     onItemSelected={(selectedItem?: any | undefined) => {
 
+                        this.props.setStateHandler({ contactList: undefined })
                         selectedItem && this.props.setStateHandler({ currentSelectedItems: [selectedItem] })
                         selectedItem && this.props.apiSearchContactsLegal((selectedItem as any)['mail']).then((r: any) => {
 
-                            this.props.setStateHandler({ contactList: r })
+                            this.props.setStateHandler({
+                                contactList: r
+
+                            })
 
                         })
                         return selectedItem ? selectedItem : null
@@ -63,7 +67,9 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                             }}
                             index={props.index}
                             onRemoveItem={() => {
-                                this.props.setStateHandler({ currentSelectedItems: [] })
+                                this.props.setStateHandler({
+                                    currentSelectedItems: [],
+                                })
 
                             }}
                         />

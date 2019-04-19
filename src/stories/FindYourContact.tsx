@@ -26,7 +26,7 @@ export default class extends BaseComponent<FindYourContactProps> {
         return (
             <>
 
-                <Layout title={'Search Contacts'} >
+                <Layout title={'Find Your Legal Contacts'} >
                     <Shadow
                         childrenComponents={[
                             {
@@ -44,14 +44,14 @@ export default class extends BaseComponent<FindYourContactProps> {
                             {
                                 type: 'NO_SHADOW',
                                 component: [
-                                    !this.props.contactList.length && <Spinner style={{ height: 465 }} size={SpinnerSize.large} />,
+                                    !this.props.contactList && <Spinner style={{ height: 465 }} size={SpinnerSize.large} />,
                                 ].filter(f => f)
                                 // component: !contactList.length  ? [<ShimmerLoadDataExample />] : contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
                             },
                             {
                                 type: 'DOUBLE_SHADOW',
                                 component: [
-                                    this.props.contactList.length && this.props.contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
+                                    this.props.contactList && this.props.contactList.length && this.props.contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
                                 ].filter(f => f)
                                 // component: !contactList.length  ? [<ShimmerLoadDataExample />] : contactList.map((c: IPersonaSharedProps | undefined) => (<PersonaBadge person={c} />))
                             },
