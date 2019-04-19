@@ -110,9 +110,11 @@ class App extends Component<any, any>{
           'Name': m.name,
           'Primary Contact': m.primaryContact,
           'Secondary Contact': m.secondaryContact,
-          'Leader': m.leader,
           'OSS Name': m.ossName,
           'OSS Contact': m.ossContact,
+          'Leader': m.leader,
+          'Last Updated': m.lastUpdated,
+          'Owner': m.owner,
           'Last Updated User': m.lastUpdatedUser,
         }))[0];
         this.setThings({
@@ -352,9 +354,12 @@ class App extends Component<any, any>{
                   'Name',
                   'Primary Contact',
                   'Secondary Contact',
-                  'Leader',
                   'OSS Name',
-                  'OSS Contact'
+                  'OSS Contact',
+                  'Leader',
+                  'Last Updated',
+                  'Owner',
+                  'Last Updated User',
                 ]}
                 groupDetails={this.state.contactGroupDetails}
                 hasGroupDetails
