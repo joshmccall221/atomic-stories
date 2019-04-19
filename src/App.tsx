@@ -388,10 +388,7 @@ class App extends Component<any, any>{
                   }
                 }}
                 textFields={[
-                  'Tool Manager',
-                  'Added By',
-                  'Last Updated',
-                  'Last Updated By'
+                  'Tool Manager'
 
                 ]}
                 groupDetails={this.state.contactGroupDetails}
@@ -409,7 +406,10 @@ class App extends Component<any, any>{
                   }
                 }}
                 textFields={[
-                  'Tool Manager'
+                  'Tool Manager',
+                  'Added By',
+                  'Last Updated',
+                  'Last Updated By'
                 ]}
                 groupDetails={this.state.contactGroupDetails}
                 viewOnly
@@ -472,7 +472,7 @@ class ErrorBoundary extends React.Component<any, any> {
   render() {
     if (this.state.hasError) {
       // You can render any custom fallback UI
-      return <h1>Something went wrong.</h1>;
+      return <h1>Something went wrong. Please refresh the page. </h1>;
     }
 
     return this.props.children;
