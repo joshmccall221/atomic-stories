@@ -27,7 +27,7 @@ const suggestionProps: IBasePickerSuggestionsProps = {
 
 
 
-export default class extends React.Component<IPeoplePickerExampleProps & { setStateHandler: () => undefined; }
+export default class extends React.Component<IPeoplePickerExampleProps
     & IPeoplePickerExampleState & any> {
     // All pickers extend from BasePicker specifying the item type.
     private _picker = React.createRef<IBasePicker<IPersonaProps>>();
@@ -43,6 +43,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                     onRenderItem={(props: IPickerItemProps<IPersonaProps>) => {
                         // debugger;
                         return <PeoplePickerItem
+                            key={props.index}
                             styles={{
                                 root: {
                                     height: 28,
@@ -76,7 +77,7 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
                         onFocus: () => {
                             console.log('onFocus called', { ...this.props })
                             if (this.props.currentSelectedItems) {
-                                this.props.setStateHandler({ currentSelectedItems: [] })
+                                this.setState({ currentSelectedItems: [] })
                             }
                         },
                         'aria-label': 'People Picker'
@@ -129,14 +130,14 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
 
             if (indexPeopleList >= 0) {
                 const newPeople: IPersonaProps[] = peopleList.slice(0, indexPeopleList).concat(peopleList.slice(indexPeopleList + 1));
-                this.props.setStateHandler({ peopleList: newPeople });
+                this.setState({ peopleList: newPeople });
             }
 
             if (indexMostRecentlyUsed >= 0) {
                 const newSuggestedPeople: IPersonaProps[] = mruState
                     .slice(0, indexMostRecentlyUsed)
                     .concat(mruState.slice(indexMostRecentlyUsed + 1));
-                this.props.setStateHandler({ mostRecentlyUsed: newSuggestedPeople });
+                this.setState({ mostRecentlyUsed: newSuggestedPeople });
             }
         }
     };
@@ -207,11 +208,11 @@ export default class extends React.Component<IPeoplePickerExampleProps & { setSt
     // }
 
     // private _toggleDelayResultsChange = (ev: React.MouseEvent<HTMLElement>, toggleState: boolean): void => {
-    //     this.props.setStateHandler({ delayResults: toggleState });
+    //     this.setState({ delayResults: toggleState });
     // };
 
     // private _dropDownSelected = (event: React.FormEvent<HTMLDivElement>, option: IDropdownOption): void => {
-    //     this.props.setStateHandler({ currentPicker: option.key });
+    //     this.setState({ currentPicker: option.key });
     // };
 
     private _validateInput = (input: string): ValidationState => {

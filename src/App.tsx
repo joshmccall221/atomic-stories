@@ -10,12 +10,6 @@ class App extends Component<any, any>{
   constructor(props: Readonly<{}>) {
     super(props);
     this.state = {
-      // setStateHandler: this.state.setStateHander.bind(this),
-      setStateHandler:
-        (state: any) => {
-          console.log('=====state.setStateHanderstate.setStateHanderstate.setStateHander', { state })
-          this._isMounted && this.setState(state);
-        },
       contactGroups: [],
       contactGroupDetails: undefined,
       toolManagers: [],
@@ -134,7 +128,7 @@ class App extends Component<any, any>{
                 'Owner': m.owner,
                 'Last Updated User': m.lastUpdatedUser,
               }))[0];
-              this.state.setStateHander({
+              this.setState({
                 contactGroupDetails
               });
               console.log('contactGroupDetails', { contactGroupDetails })
@@ -144,7 +138,7 @@ class App extends Component<any, any>{
         },
       apiContactGroupsIDDisplayName:
         async ({ id }: any) => {
-          this.state.setStateHander({
+          this.setState({
             contactGroupDetails: []
           });
           return await endpoints({
@@ -163,7 +157,7 @@ class App extends Component<any, any>{
                 'Owner': m.owner,
                 'Last Updated User': m.lastUpdatedUser,
               }))[0];
-              this.state.setStateHander({
+              this.setState({
                 contactGroupDetails
               });
               console.log('contactGroupDetails', { contactGroupDetails })
@@ -186,7 +180,7 @@ class App extends Component<any, any>{
                 'Last Updated': m.lastUpdated,
                 'Last Updated By': m.lastUpdatedBy
               }))[0];
-              this.state.setStateHander({
+              this.setState({
                 contactGroupDetails
               });
               return response.data;
@@ -209,7 +203,7 @@ class App extends Component<any, any>{
                 'Last Updated': m.lastUpdated,
                 'Last Updated By': m.lastUpdatedBy
               }))[0];
-              this.state.setStateHander({
+              this.setState({
                 contactGroupDetails
               });
               return response.data;
@@ -233,7 +227,7 @@ class App extends Component<any, any>{
     };
     // this.state.apiToolManagers();
     // this.state.apiContactGroups();
-    // this.state.setStateHander = this.state.setStateHander.bind(this);
+    // this.setState = this.setState.bind(this);
     this._isMounted = false;
     this.state.apiSearchContactsLegal(authContext._user.userName)
       .then((people: any) => {
@@ -277,7 +271,7 @@ class App extends Component<any, any>{
         {false && this.findYourContactPage(route)}
         {[
 
-          <FindYourContact
+          route === 'FindYourContact' && <FindYourContact
             {...this.state}
             apiSearchUsers={this.state.apiSearchUsers.bind(this)}
             apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)}
@@ -305,9 +299,80 @@ class App extends Component<any, any>{
               }
             }
           />,
-          <div>2</div>,
-          <div>3</div>,
-          <div>4</div>,
+          route === 'GROUP_DETAILS' &&
+          <ContactGroup
+            {...this.state}
+            title={"Contact Groups"}
+            links={{
+              ...this.state.links,
+            }}
+            columns={[
+              { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
+              { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
+              { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
+              { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
+            ]}
+            contactList={this.state.contactGroups && this.state.contactGroups
+              .map((m: {
+                name: any;
+                primaryContact: any;
+                secondaryContact: any;
+                leader: any;
+                ossName: any;
+                ossContact: any;
+              }) => ({
+                Name: m.name,
+                Primary: m.primaryContact,
+                Secondary: m.secondaryContact,
+                Lead: m.leader,
+                OSS_NAME: m.ossName,
+                OSS_CONTACT: m.ossContact,
+                ...m
+              }))} />,
+          route === 'ADD_CONTACT_GROUP' &&
+          <Group
+            {...this.state}
+            title={'New Contact Group'}
+            links={{
+              ...this.state.links,
+              BACK: this.state.links.GROUP_DETAILS,
+              EDIT: this.state.links.GROUP_DETAILS,
+            }}
+            textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+            CONTACT
+            ADD
+          />,
+          route === 'TOOL_MANAGERS' &&
+          <ToolManagers
+            {...this.state}
+            links={{
+              ...this.state.links,
+            }}
+            contactList={
+              this.state.toolManagers
+                .map((m: { toolManager: any; }) =>
+                  ({ TOOL_MANAGERS: m.toolManager, ...m }))
+            }
+          />,
+          route === 'EDIT_CONTACT_GROUP' &&
+          <Group
+            {...this.state}
+            title={'Edit Contact Group'}
+            links={{
+              ...this.state.links,
+              BACK: this.state.links.GROUP_DETAILS,
+              EDIT: () => {
+                this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
+                this.state.links.GROUP_DETAILS();
+              },
+            }}
+            textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+            groupDetails={this.state.contactGroupDetails}
+            hasGroupDetails
+            CONTACT
+            ADD
+          />
+
         ].map((m, i) => <div key={i}>{m}</div>)}
       </>
     );
@@ -316,81 +381,11 @@ class App extends Component<any, any>{
   private findYourContactPage(route: any) {
     return <ErrorBoundary>
       {{
-        FindYourContact:
-          (<FindYourContact {...this.state} apiSearchUsers={this.state.apiSearchUsers.bind(this)} apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)} onRemoveItem={() => {
-            this.setState({
-              currentSelectedItems: [],
-            });
-          }} onItemSelected={(({ name }: {
-            name?: any;
-          }) => (selectedItem?: any | undefined) => {
-            this.setState({ contactList: undefined });
-            selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
-            selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail']).then((data: any) => {
-              console.log('onItemSelected', { name, selectedItem, props: this.state });
-              this.setState({
-                contactList: data,
-                contactGroupDetails: {
-                  ...this.props.contactGroupDetails,
-                  [name]: data.mail
-                }
-              });
-            });
-            return selectedItem ? selectedItem : null;
-          })({})} />),
 
 
-        TOOL_MANAGERS: [
-          <ToolManagers {...this.state} links={{
-            ...this.state.links,
-          }} contactList={this.state.toolManagers.map((m: {
-            toolManager: any;
-          }) => ({
-            TOOL_MANAGERS: m.toolManager,
-            ...m
-          }))} />
-        ],
-        GROUP_DETAILS: [
-          <ContactGroup title={"Contact Groups"} {...this.state} links={{
-            ...this.state.links,
-          }} columns={[
-            { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
-            { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
-            { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
-            { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
-          ]} contactList={this.state.contactGroups && this.state.contactGroups.map((m: {
-            name: any;
-            primaryContact: any;
-            secondaryContact: any;
-            leader: any;
-            ossName: any;
-            ossContact: any;
-          }) => ({
-            Name: m.name,
-            Primary: m.primaryContact,
-            Secondary: m.secondaryContact,
-            Lead: m.leader,
-            OSS_NAME: m.ossName,
-            OSS_CONTACT: m.ossContact,
-            ...m
-          }))} />
-        ],
-        ADD_CONTACT_GROUP: [
-          <Group {...this.state} title={'New Contact Group'} links={{
-            ...this.state.links,
-            BACK: this.state.links.GROUP_DETAILS,
-            EDIT: this.state.links.GROUP_DETAILS,
-          }} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} CONTACT ADD />
-        ],
+
         EDIT_CONTACT_GROUP: [
-          <Group {...this.state} title={'Edit Contact Group'} links={{
-            ...this.state.links,
-            BACK: this.state.links.GROUP_DETAILS,
-            EDIT: () => {
-              this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
-              this.state.links.GROUP_DETAILS();
-            },
-          }} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} groupDetails={this.state.contactGroupDetails} hasGroupDetails CONTACT ADD />
+
         ],
         VIEW_CONTACT_GROUP: [
           <Group {...this.state} title={'View Contact Group'} links={{
@@ -478,17 +473,11 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
   )
     .then(thenFunc)
     .catch((error: any) => {
-      // thenFunc()
-      // this.state.apiContactGroups()
-      // this.state.apiToolManagers()
       console.log({ error });
     });
 };
 
 export const endpointBaseUrl = `https://fyc-dev.azurewebsites.net`;
-// window.location.hostname === 'localhost'
-//   ? `https://cors-anywhere.herokuapp.com/fyc-dev.azurewebsites.net`
-//   : `https://fyc-dev.azurewebsites.net`;
 
 export const enpointConfig = ({ method }: any) => { method };
 class ErrorBoundary extends React.Component<any, any> {

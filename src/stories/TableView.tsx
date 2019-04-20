@@ -9,11 +9,11 @@ export type Props = { contactList: PersonProps[]; } & any;
 export class Shadow extends React.PureComponent<Props>{
     render() {
         const { childrenComponents, children, type, width } = this.props;
-        const renderChildrenComponents = childrenComponents && childrenComponents.map((m: any) => {
-            return ({
-                SHADOW: () =>
+        const renderChildrenComponents = childrenComponents && childrenComponents.map((m: any, i: any) => {
+            return [
+                (type || m.type) === 'SHADOW' && (
 
-                    <div key={'shadowComponent'} style={{ ...{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
+                    <div key={i} style={{ ...{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' } }} >
                         <div style={{
                             border: '1px solid #e5e5e5',
                             boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
@@ -22,33 +22,29 @@ export class Shadow extends React.PureComponent<Props>{
                         }} >
                             {m.component}
                         </div>
-                    </div>,
-                DOUBLE_SHADOW: () =>
-                    <>
+                    </div>),
+                (type || m.type) === 'DOUBLE_SHADOW' && (
+                    <div key={i}>
                         {/* {m.component} */}
-                        {m.component.map((m: any) => {
-                            return <>
-                                <div key={`doubleShadowComponent-${m.id}`} style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, margin: '2em', width: 260, display: 'inline-block', textAlign: 'center' }}>
-                                    <div style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', }}>
-                                        <div style={{ textAlign: 'center', paddingTop: 20 }}>
-                                            {m}
-                                        </div>
+                        {m.component.map((m: any, i: any) => (
+                            <div key={i} style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', padding: 20, margin: '2em', width: 260, display: 'inline-block', textAlign: 'center' }}>
+                                <div style={{ border: '1px solid #e5e5e5', boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)', }}>
+                                    <div style={{ textAlign: 'center', paddingTop: 20 }}>
+                                        {m}
                                     </div>
                                 </div>
-                            </>;
-                        })}
-                    </>
-                ,
-                NO_SHADOW: () => m.component,
-                FOOTER: () =>
+                            </div>)
+                        )}
+                    </div>),
+                (type || m.type) === 'NO_SHADOW' && (<div key={i}> {m.component}</div>),
+                (type || m.type) === 'FOOTER' && (
 
-                    <div key={`noShadowComponent-${m.id}`} style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' }}>
+                    <div key={i} style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center' }}>
                         {m.component}
-                    </div>
-            })[type || m.type]()
+                    </div>)
+            ].map((m, i) => <div key={i}>{m}</div>)
         })
         return (
-
             <>
                 {children}
                 {renderChildrenComponents}
@@ -60,7 +56,7 @@ export class Shadow extends React.PureComponent<Props>{
 export class Layout extends React.PureComponent<Props>{
     render() {
         const { children, title, maxWidth } = this.props;
-        return (<>
+        return (
             <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
                 <div style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', maxWidth: '400px', ...{ maxWidth: maxWidth } }}>
                     <h1 style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', width: '100%' }}>{title}</h1>
@@ -68,21 +64,21 @@ export class Layout extends React.PureComponent<Props>{
                 </div>
 
             </div>
-        </>)
+        )
     }
 }
 export default class extends React.PureComponent<Props>{
     render() {
         const { contactList, links, title, columns } = this.props;
-        console.log('contact group', this.props)
+        // console.log('contact group', this.props)
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
-            console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
-            this.props.setStateHandler({ contactGroupDetails: undefined })
+            // console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
+            this.setState({ contactGroupDetails: undefined })
             return ({
                 VIEW: () => this.props.apiContactGroupsIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id }),
                 DELETE: () => {
-                    this.props.setStateHandler({
+                    this.setState({
                         contactGroups: [],
                         groupDetails: [],
                         toolManagers: []
@@ -107,41 +103,40 @@ export default class extends React.PureComponent<Props>{
                         childrenComponents={[
                             {
                                 type: 'SHADOW',
-                                component: [
-                                    <>
-                                        <ShimmeredDetailsList
-                                            selectionMode={0}
-                                            setKey="items"
-                                            styles={{
-                                                root: {
-                                                }
-                                            }}
-                                            items={[...contactList && contactList.map(
-                                                (m: any) => ({
-                                                    ...m,
-                                                    Actions: [
-                                                        <ActionButtons
-                                                            {...{ ...this.props }}
-                                                            m={m}
-                                                            actionOnclick={actionOnclick}
-                                                            links={{
-                                                                ...links,
-                                                                ...{ VIEW: links.VIEW('_CONTACT_GROUP') },
-                                                                ...{ EDIT: links.EDIT('_CONTACT_GROUP') },
-                                                                ...{ DELETE: links.DELETE('_CONTACT_GROUP') }
-                                                            }} />,
-                                                    ],
-                                                }))
-                                            ]}
-                                            columns={columns}
-                                            enableShimmer={!contactList.length}
-                                            onRenderRow={this._onRenderRow}
-                                        />
-                                    </>]
+                                component:
+                                    <ShimmeredDetailsList
+                                        selectionMode={0}
+                                        setKey="items"
+                                        styles={{
+                                            root: {
+                                            }
+                                        }}
+                                        items={[...contactList && contactList.map(
+                                            (m: any, i: any) => ({
+                                                ...m,
+                                                Actions: [
+                                                    <ActionButtons
+                                                        {...{ ...this.props }}
+                                                        key={i}
+                                                        m={m}
+                                                        actionOnclick={actionOnclick}
+                                                        links={{
+                                                            ...links,
+                                                            ...{ VIEW: links.VIEW('_CONTACT_GROUP') },
+                                                            ...{ EDIT: links.EDIT('_CONTACT_GROUP') },
+                                                            ...{ DELETE: links.DELETE('_CONTACT_GROUP') }
+                                                        }} />,
+                                                ],
+                                            }))
+                                        ]}
+                                        columns={columns}
+                                        enableShimmer={!contactList.length}
+                                        onRenderRow={this._onRenderRow}
+                                    />
                             },
                             {
                                 type: 'NO_SHADOW',
-                                component: < NavButtons links={{
+                                component: <NavButtons links={{
                                     ...links,
                                     ...{ ADD: links.ADD('_CONTACT_GROUP') }
                                 }} />
@@ -174,12 +169,12 @@ export class ToolManagers extends React.PureComponent<Props>{
         const { contactList, links } = this.props;
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
             console.log('ToolManagersactionOnclick', { props: this.props, actionType, row, id: row.id })
-            this.props.setStateHandler({ contactGroupDetails: undefined })
+            this.setState({ contactGroupDetails: undefined })
             return ({
                 VIEW: () => this.props.apiToolManagersIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiToolManagersIDAlias({ id: row.id }),
                 DELETE: () => {
-                    this.props.setStateHandler({
+                    this.setState({
                         contactGroups: [],
                         groupDetails: [],
                         toolManagers: []
@@ -202,7 +197,7 @@ export class ToolManagers extends React.PureComponent<Props>{
                             childrenComponents={[
                                 {
                                     type: 'SHADOW',
-                                    component: [
+                                    component:
                                         <ShimmeredDetailsList
                                             selectionMode={0}
                                             setKey="items"
@@ -210,14 +205,13 @@ export class ToolManagers extends React.PureComponent<Props>{
                                             items={[...contactList.map(
                                                 (m: any) => ({
                                                     ...m,
-                                                    Actions: [
+                                                    Actions:
                                                         <ActionButtons m={m} actionOnclick={actionOnclick} links={{
                                                             ...links,
                                                             ...{ VIEW: links.VIEW('_TOOL_MANAGER') },
                                                             ...{ EDIT: links.EDIT('_TOOL_MANAGER') },
                                                             ...{ DELETE: links.DELETE('_TOOL_MANAGER') }
                                                         }} />,
-                                                    ],
                                                 }))
                                             ]}
                                             columns={[
@@ -226,7 +220,7 @@ export class ToolManagers extends React.PureComponent<Props>{
                                             ]}
                                             enableShimmer={!contactList.length}
                                             onRenderRow={this._onRenderRow}
-                                        />]
+                                        />
                                 },
                                 {
                                     type: 'NO_SHADOW', component: < NavButtons links={{
@@ -260,7 +254,7 @@ export class ToolManagers extends React.PureComponent<Props>{
 export class ActionButtons extends React.PureComponent<Props>{
     render() {
         const { actionOnclick, m, links } = this.props;
-        console.log('ActionButtons', this.props)
+        // console.log('ActionButtons', this.props)
         return (
             <section >
                 <IconButton
@@ -372,7 +366,7 @@ export class Group extends React.PureComponent<Props>{
         console.log('!!!!!!!!!!!!!!Group', this.props)
         const onChange = (label: any) => (m: any) => {
             console.log('onChange', { label, m, groupDetails })
-            this.props.setStateHandler({
+            this.setState({
                 contactGroupDetails: {
                     // ...groupDetails,
                     ...this.props.contactGroupDetails,
@@ -407,7 +401,7 @@ export class Group extends React.PureComponent<Props>{
                     ,
                     endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
                 })
-            this.props.setStateHandler({
+            this.setState({
                 contactGroups: [],
                 groupDetails: [],
                 toolManagers: []
@@ -424,7 +418,7 @@ export class Group extends React.PureComponent<Props>{
                         {[
 
                             hasGroupDetails && groupDetails === undefined && <Spinner key={'spinner'} style={{ height: 335 }} size={SpinnerSize.large} />,
-                            (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string) => {
+                            (!hasGroupDetails || hasGroupDetails && groupDetails) && textFields.map((m: string, i: any) => {
                                 return [
                                     ADD
                                     && [!![
@@ -437,7 +431,7 @@ export class Group extends React.PureComponent<Props>{
                                     ].filter(f => f === m).length
 
                                         &&
-                                        <div style={{ margin: 5 }}>
+                                        <div key={i} style={{ margin: 5 }}>
                                             <div style={{ width: '100%', margin: 5 }}>
                                                 {m}
                                             </div>
@@ -451,7 +445,7 @@ export class Group extends React.PureComponent<Props>{
                                                 onRemoveItem={(({ name }: any) => (selectedItem?: any | undefined) => {
 
                                                     console.log('onRemoveItem', { name, selectedItem, props: this.props })
-                                                    selectedItem && this.props.setStateHandler({
+                                                    selectedItem && this.setState({
                                                         currentSelectedItems: { [name]: [] },
                                                         contactGroupDetails: {
                                                             ...this.props.contactGroupDetails,
@@ -466,9 +460,9 @@ export class Group extends React.PureComponent<Props>{
                                                 onItemSelected={
                                                     (({ name }: any) => (selectedItem?: any | undefined) => {
 
-                                                        // this.props.setStateHandler({ contactList: undefined })
+                                                        // this.setState({ contactList: undefined })
                                                         console.log('onItemSelected', { name, selectedItem, props: this.props })
-                                                        selectedItem && this.props.setStateHandler({
+                                                        selectedItem && this.setState({
                                                             currentSelectedItems: { [name]: [selectedItem] },
                                                             contactGroupDetails: {
                                                                 ...this.props.contactGroupDetails,
@@ -490,13 +484,14 @@ export class Group extends React.PureComponent<Props>{
                                         'Tool Manager',
                                     ].filter(f => f === m).length &&
                                     <TextField
+                                        key={i}
                                         styles={{
                                             root: { width: 235, margin: 'auto' }
                                         }}
-                                        key={`TextField-${m}`}
                                         label={m}
                                         disabled={viewOnly}
                                         onChange={(e, v) => onChange(m)(v)}
+                                        value={groupDetails && groupDetails[m] ? groupDetails[m] : ""}
                                         {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
                                         {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
                                     />,
@@ -505,14 +500,14 @@ export class Group extends React.PureComponent<Props>{
                                         styles={{
                                             root: { width: 235, margin: 'auto' }
                                         }}
-                                        key={`TextField-${m}`}
+                                        key={i}
                                         label={m}
                                         disabled={viewOnly}
                                         onChange={(e, v) => onChange(m)(v)}
                                         {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
                                         {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
                                     />,
-                                ]
+                                ].map((m, i) => <div key={i}>{m}</div>)
                             })
                         ]}
 
