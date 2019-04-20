@@ -29,6 +29,7 @@ class App extends Component<any, any>{
         EDIT: (param: any) => () => this.setState({ route: `EDIT${param}` }),
         DELETE: (param: any) => () => console.log('DELETE'),
       },
+      setState: (state: any) => this.setState(state),
       // isToolManager: this.isToolManager(),
       isToolManager:
         async () => {
@@ -225,9 +226,8 @@ class App extends Component<any, any>{
           })
         },
     };
-    // this.state.apiToolManagers();
-    // this.state.apiContactGroups();
-    // this.setState = this.setState.bind(this);
+    this.state.apiToolManagers();
+    this.state.apiContactGroups();
     this._isMounted = false;
     this.state.apiSearchContactsLegal(authContext._user.userName)
       .then((people: any) => {
@@ -267,185 +267,220 @@ class App extends Component<any, any>{
     const { route } = this.state;
     console.log('=========route', { route, authContext })
     return (
-      <>
-        {false && this.findYourContactPage(route)}
-        {[
+      <ErrorBoundary>
+        <>
+          {[
 
-          route === 'FindYourContact' && <FindYourContact
-            {...this.state}
-            apiSearchUsers={this.state.apiSearchUsers.bind(this)}
-            apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)}
-            onRemoveItem={() => {
-              this.setState({
-                currentSelectedItems: [],
-              });
-            }}
-            onItemSelected={
-              (selectedItem?: any | undefined) => {
-                this.setState({ contactList: undefined });
-                selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
-                selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail'])
-                  .then((data: any) => {
-                    console.log('onItemSelected', { name, selectedItem, props: this.state });
-                    this.setState({
-                      contactList: data,
-                      contactGroupDetails: {
-                        ...this.props.contactGroupDetails,
-                        [name]: data.mail
-                      }
+            route === 'FindYourContact' && <FindYourContact
+              {...this.state}
+              apiSearchUsers={this.state.apiSearchUsers.bind(this)}
+              apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)}
+              onRemoveItem={() => {
+                this.setState({
+                  currentSelectedItems: [],
+                });
+              }}
+              onItemSelected={
+                (selectedItem?: any | undefined) => {
+                  this.setState({ contactList: undefined });
+                  selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
+                  selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail'])
+                    .then((data: any) => {
+                      console.log('onItemSelected', { name, selectedItem, props: this.state });
+                      this.setState({
+                        contactList: data,
+                        contactGroupDetails: {
+                          ...this.props.contactGroupDetails,
+                          [name]: data.mail
+                        }
+                      });
                     });
-                  });
-                return selectedItem ? selectedItem : null;
+                  return selectedItem ? selectedItem : null;
+                }
               }
-            }
-          />,
-          route === 'GROUP_DETAILS' &&
-          <ContactGroup
-            {...this.state}
-            title={"Contact Groups"}
-            links={{
-              ...this.state.links,
-            }}
-            columns={[
-              { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
-              { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
-              { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
-              { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
-            ]}
-            contactList={this.state.contactGroups && this.state.contactGroups
-              .map((m: {
-                name: any;
-                primaryContact: any;
-                secondaryContact: any;
-                leader: any;
-                ossName: any;
-                ossContact: any;
-              }) => ({
-                Name: m.name,
-                Primary: m.primaryContact,
-                Secondary: m.secondaryContact,
-                Lead: m.leader,
-                OSS_NAME: m.ossName,
-                OSS_CONTACT: m.ossContact,
-                ...m
-              }))} />,
-          route === 'ADD_CONTACT_GROUP' &&
-          <Group
-            {...this.state}
-            title={'New Contact Group'}
-            links={{
-              ...this.state.links,
-              BACK: this.state.links.GROUP_DETAILS,
-              EDIT: this.state.links.GROUP_DETAILS,
-            }}
-            textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
-            CONTACT
-            ADD
-          />,
-          route === 'TOOL_MANAGERS' &&
-          <ToolManagers
-            {...this.state}
-            links={{
-              ...this.state.links,
-            }}
-            contactList={
-              this.state.toolManagers
-                .map((m: { toolManager: any; }) =>
-                  ({ TOOL_MANAGERS: m.toolManager, ...m }))
-            }
-          />,
-          route === 'EDIT_CONTACT_GROUP' &&
-          <Group
-            {...this.state}
-            title={'Edit Contact Group'}
-            links={{
-              ...this.state.links,
-              BACK: this.state.links.GROUP_DETAILS,
-              EDIT: () => {
-                this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
-                this.state.links.GROUP_DETAILS();
-              },
-            }}
-            textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
-            groupDetails={this.state.contactGroupDetails}
-            hasGroupDetails
-            CONTACT
-            ADD
-          />
+            />,
+            route === 'GROUP_DETAILS' &&
+            <ContactGroup
+              {...this.state}
+              title={"Contact Groups"}
+              links={{
+                ...this.state.links,
+              }}
+              columns={[
+                { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
+                { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
+                { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
+                { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
+              ]}
+              contactList={this.state.contactGroups && this.state.contactGroups
+                .map((m: {
+                  name: any;
+                  primaryContact: any;
+                  secondaryContact: any;
+                  leader: any;
+                  ossName: any;
+                  ossContact: any;
+                }) => ({
+                  Name: m.name,
+                  Primary: m.primaryContact,
+                  Secondary: m.secondaryContact,
+                  Lead: m.leader,
+                  OSS_NAME: m.ossName,
+                  OSS_CONTACT: m.ossContact,
+                  ...m
+                }))} />,
+            route === 'ADD_CONTACT_GROUP' &&
+            <Group
+              {...this.state}
+              title={'New Contact Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.GROUP_DETAILS,
+                EDIT: this.state.links.GROUP_DETAILS,
+              }}
+              textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+              CONTACT
+              ADD
+            />,
+            route === 'TOOL_MANAGERS' &&
+            <ToolManagers
+              {...this.state}
+              links={{
+                ...this.state.links,
+              }}
+              contactList={
+                this.state.toolManagers
+                  .map((m: { toolManager: any; }) =>
+                    ({ TOOL_MANAGERS: m.toolManager, ...m }))
+              }
+            />,
+            route === 'EDIT_CONTACT_GROUP' &&
+            <Group
+              {...this.state}
+              title={'Edit Contact Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.GROUP_DETAILS,
+                EDIT: () => {
+                  this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
+                  this.state.links.GROUP_DETAILS();
+                },
+              }}
+              textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
+              groupDetails={this.state.contactGroupDetails}
+              hasGroupDetails
+              CONTACT
+              ADD
+            />,
+            route === 'VIEW_CONTACT_GROUP' &&
+            <Group
+              {...this.state}
+              title={'View Contact Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.GROUP_DETAILS,
+                EDIT: () => {
+                  this.state.links.EDIT('_CONTACT_GROUP')();
+                  this.state.apiContactGroupsIDDisplayName({ id: this.state.contactGroupDetails.id });
+                }
+              }}
+              textFields={[
+                'Name',
+                'Primary Contact',
+                'Secondary Contact',
+                'OSS Name',
+                'OSS Contact',
+                'Leader',
+                'Last Updated',
+                'Owner',
+                'Last Updated User',
+              ]}
+              groupDetails={this.state.contactGroupDetails}
+              hasGroupDetails
+              viewOnly
+            />,
+            route === 'ADD_TOOL_MANAGER' &&
+            <Group
+              {...this.state}
+              title={'New Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.TOOL_MANAGERS,
+                EDIT: this.state.links.TOOL_MANAGERS
+              }}
+              textFields={[
+                'Tool Manager'
+              ]}
+              ADD
+            />,
+            route === 'EDIT_TOOL_MANAGER' &&
+            <Group
+              {...this.state}
+              title={'Edit Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.TOOL_MANAGERS,
+                EDIT: () => {
+                  this.state.links.TOOL_MANAGERS();
+                  this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+                }
+              }}
+              textFields={[
+                'Tool Manager'
+              ]}
+              groupDetails={this.state.contactGroupDetails}
+              ADD
+            />,
+            route === 'EDIT_TOOL_MANAGER' &&
+            <Group
+              {...this.state}
+              title={'View Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.TOOL_MANAGERS,
+                EDIT: () => {
+                  this.state.links.EDIT('_TOOL_MANAGER')();
+                  this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+                }
+              }}
+              textFields={[
+                'Tool Manager',
+                'Added By',
+                'Last Updated',
+                'Last Updated By'
+              ]}
+              groupDetails={this.state.contactGroupDetails}
+              viewOnly
+            />,
+            route === 'VIEW_TOOL_MANAGER' &&
+            <Group
+              {...this.state}
+              title={'View Group'}
+              links={{
+                ...this.state.links,
+                BACK: this.state.links.TOOL_MANAGERS,
+                EDIT: () => {
+                  this.state.links.EDIT('_TOOL_MANAGER')();
+                  this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+                }
+              }}
+              textFields={[
+                'Tool Manager',
+                'Added By',
+                'Last Updated',
+                'Last Updated By'
+              ]}
+              groupDetails={this.state.contactGroupDetails}
+              viewOnly
+            />
 
-        ].map((m, i) => <div key={i}>{m}</div>)}
-      </>
+          ].map((m, i) => <div key={i}>{m}</div>)}
+        </>
+      </ErrorBoundary>
     );
   }
 
-  private findYourContactPage(route: any) {
-    return <ErrorBoundary>
-      {{
 
-
-
-        EDIT_CONTACT_GROUP: [
-
-        ],
-        VIEW_CONTACT_GROUP: [
-          <Group {...this.state} title={'View Contact Group'} links={{
-            ...this.state.links,
-            BACK: this.state.links.GROUP_DETAILS,
-            EDIT: () => {
-              this.state.links.EDIT('_CONTACT_GROUP')();
-              this.state.apiContactGroupsIDDisplayName({ id: this.state.contactGroupDetails.id });
-            }
-          }} textFields={[
-            'Name',
-            'Primary Contact',
-            'Secondary Contact',
-            'OSS Name',
-            'OSS Contact',
-            'Leader',
-            'Last Updated',
-            'Owner',
-            'Last Updated User',
-          ]} groupDetails={this.state.contactGroupDetails} hasGroupDetails viewOnly />
-        ],
-        ADD_TOOL_MANAGER: [
-          <Group {...this.state} title={'New Group'} links={{
-            ...this.state.links,
-            BACK: this.state.links.TOOL_MANAGERS,
-            EDIT: this.state.links.TOOL_MANAGERS
-          }} textFields={[
-            'Tool Manager'
-          ]} ADD />
-        ],
-        EDIT_TOOL_MANAGER: [
-          <Group {...this.state} title={'Edit Group'} links={{
-            ...this.state.links,
-            BACK: this.state.links.TOOL_MANAGERS,
-            EDIT: () => {
-              this.state.links.TOOL_MANAGERS();
-              this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
-            }
-          }} textFields={[
-            'Tool Manager'
-          ]} groupDetails={this.state.contactGroupDetails} ADD />
-        ],
-        VIEW_TOOL_MANAGER: [
-          <Group {...this.state} title={'View Group'} links={{
-            ...this.state.links,
-            BACK: this.state.links.TOOL_MANAGERS,
-            EDIT: () => {
-              this.state.links.EDIT('_TOOL_MANAGER')();
-              this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
-            }
-          }} textFields={[
-            'Tool Manager',
-            'Added By',
-            'Last Updated',
-            'Last Updated By'
-          ]} groupDetails={this.state.contactGroupDetails} viewOnly />
-        ]
-      }[route]}
-    </ErrorBoundary>;
-  }
 }
 
 export default App;

@@ -77,7 +77,7 @@ export default class extends React.Component<IPeoplePickerExampleProps
                         onFocus: () => {
                             console.log('onFocus called', { ...this.props })
                             if (this.props.currentSelectedItems) {
-                                this.setState({ currentSelectedItems: [] })
+                                this.props.setState({ currentSelectedItems: [] })
                             }
                         },
                         'aria-label': 'People Picker'
@@ -130,14 +130,14 @@ export default class extends React.Component<IPeoplePickerExampleProps
 
             if (indexPeopleList >= 0) {
                 const newPeople: IPersonaProps[] = peopleList.slice(0, indexPeopleList).concat(peopleList.slice(indexPeopleList + 1));
-                this.setState({ peopleList: newPeople });
+                this.props.setState({ peopleList: newPeople });
             }
 
             if (indexMostRecentlyUsed >= 0) {
                 const newSuggestedPeople: IPersonaProps[] = mruState
                     .slice(0, indexMostRecentlyUsed)
                     .concat(mruState.slice(indexMostRecentlyUsed + 1));
-                this.setState({ mostRecentlyUsed: newSuggestedPeople });
+                this.props.setState({ mostRecentlyUsed: newSuggestedPeople });
             }
         }
     };
@@ -208,11 +208,11 @@ export default class extends React.Component<IPeoplePickerExampleProps
     // }
 
     // private _toggleDelayResultsChange = (ev: React.MouseEvent<HTMLElement>, toggleState: boolean): void => {
-    //     this.setState({ delayResults: toggleState });
+    //     this.props.setState({ delayResults: toggleState });
     // };
 
     // private _dropDownSelected = (event: React.FormEvent<HTMLDivElement>, option: IDropdownOption): void => {
-    //     this.setState({ currentPicker: option.key });
+    //     this.props.setState({ currentPicker: option.key });
     // };
 
     private _validateInput = (input: string): ValidationState => {

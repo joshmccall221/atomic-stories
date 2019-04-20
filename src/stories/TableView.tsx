@@ -73,12 +73,12 @@ export default class extends React.PureComponent<Props>{
         // console.log('contact group', this.props)
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
             // console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
-            this.setState({ contactGroupDetails: undefined })
+            this.props.setState({ contactGroupDetails: undefined })
             return ({
                 VIEW: () => this.props.apiContactGroupsIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id }),
                 DELETE: () => {
-                    this.setState({
+                    this.props.setState({
                         contactGroups: [],
                         groupDetails: [],
                         toolManagers: []
@@ -169,12 +169,12 @@ export class ToolManagers extends React.PureComponent<Props>{
         const { contactList, links } = this.props;
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
             console.log('ToolManagersactionOnclick', { props: this.props, actionType, row, id: row.id })
-            this.setState({ contactGroupDetails: undefined })
+            this.props.setState({ contactGroupDetails: undefined })
             return ({
                 VIEW: () => this.props.apiToolManagersIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiToolManagersIDAlias({ id: row.id }),
                 DELETE: () => {
-                    this.setState({
+                    this.props.setState({
                         contactGroups: [],
                         groupDetails: [],
                         toolManagers: []
@@ -366,7 +366,7 @@ export class Group extends React.PureComponent<Props>{
         console.log('!!!!!!!!!!!!!!Group', this.props)
         const onChange = (label: any) => (m: any) => {
             console.log('onChange', { label, m, groupDetails })
-            this.setState({
+            this.props.setState({
                 contactGroupDetails: {
                     // ...groupDetails,
                     ...this.props.contactGroupDetails,
@@ -401,7 +401,7 @@ export class Group extends React.PureComponent<Props>{
                     ,
                     endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
                 })
-            this.setState({
+            this.props.setState({
                 contactGroups: [],
                 groupDetails: [],
                 toolManagers: []
@@ -445,7 +445,7 @@ export class Group extends React.PureComponent<Props>{
                                                 onRemoveItem={(({ name }: any) => (selectedItem?: any | undefined) => {
 
                                                     console.log('onRemoveItem', { name, selectedItem, props: this.props })
-                                                    selectedItem && this.setState({
+                                                    selectedItem && this.props.setState({
                                                         currentSelectedItems: { [name]: [] },
                                                         contactGroupDetails: {
                                                             ...this.props.contactGroupDetails,
@@ -460,9 +460,9 @@ export class Group extends React.PureComponent<Props>{
                                                 onItemSelected={
                                                     (({ name }: any) => (selectedItem?: any | undefined) => {
 
-                                                        // this.setState({ contactList: undefined })
+                                                        // this.props.setState({ contactList: undefined })
                                                         console.log('onItemSelected', { name, selectedItem, props: this.props })
-                                                        selectedItem && this.setState({
+                                                        selectedItem && this.props.setState({
                                                             currentSelectedItems: { [name]: [selectedItem] },
                                                             contactGroupDetails: {
                                                                 ...this.props.contactGroupDetails,
@@ -491,8 +491,10 @@ export class Group extends React.PureComponent<Props>{
                                         label={m}
                                         disabled={viewOnly}
                                         onChange={(e, v) => onChange(m)(v)}
-                                        value={groupDetails && groupDetails[m] ? groupDetails[m] : ""}
-                                        {...viewOnly && { placeholder: groupDetails && groupDetails[m] }}
+                                        {...viewOnly && {
+                                            placeholder: groupDetails && groupDetails[m],
+                                            defaultValue: groupDetails && groupDetails[m]
+                                        }}
                                         {...!viewOnly && { defaultValue: groupDetails && groupDetails[m] }}
                                     />,
                                     ],
