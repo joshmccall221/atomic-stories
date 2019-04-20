@@ -10,33 +10,15 @@ class App extends Component<any, any>{
   constructor(props: Readonly<{}>) {
     super(props);
     this.state = {
-      setStateHandler: this.setThings.bind(this),
-      isToolManager: this.isToolManager(),
+      // setStateHandler: this.state.setStateHander.bind(this),
+      setStateHandler:
+        (state: any) => {
+          console.log('=====state.setStateHanderstate.setStateHanderstate.setStateHander', { state })
+          this._isMounted && this.setState(state);
+        },
       contactGroups: [],
       contactGroupDetails: undefined,
-      apiSearchUsers: this.apiSearchUsers.bind(this),
-      apiSearchContactsLegal: this.apiSearchContactsLegal.bind(this),
-      apiContactGroups: this.apiContactGroups.bind(this),
-      apiToolManagers: this.apiToolManagers.bind(this),
-      apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
-      apiContactGroupsIDDisplayName: this.apiContactGroupsIDDisplayName.bind(this),
-      apiToolManagersIDAlias: this.apiToolManagersIDAlias.bind(this),
-      apiToolManagersIDDisplayName: this.apiToolManagersIDDisplayName.bind(this),
-      post: ({ id, data, endpoint, method }: any) => {
-        console.log('post', { id, data })
-        endpoints({
-          id,
-          endpoint,
-          method,
-          data,
-          thenFunc: () => {
-            this.apiContactGroups()
-            this.apiToolManagers()
-          }
-
-        })
-      },
-      toolManagers: [this.apiToolManagers()],
+      toolManagers: [],
       delayResults: true,
       peopleList: [],
       mostRecentlyUsed: [],
@@ -52,47 +34,232 @@ class App extends Component<any, any>{
         VIEW: (param: any) => () => this.setState({ route: `VIEW${param}` }),
         EDIT: (param: any) => () => this.setState({ route: `EDIT${param}` }),
         DELETE: (param: any) => () => console.log('DELETE'),
-      }
+      },
+      // isToolManager: this.isToolManager(),
+      isToolManager:
+        async () => {
+          return await endpoints({
+            alias: authContext._user.userName,
+            endpoint: 'apiToolManagersAliasToolManager',
+            thenFunc: (response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
+              console.log('apiToolManagersAliasToolManager', { authContext, response })
+              //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
+              this.setState({
+                isToolManager: response.data
+              });
+              return response.data;
+            }
+          })
+        },
+      // apiSearchUsers: this.apiSearchUsers.bind(this),
+      apiSearchUsers:
+        async (contact: any) => {
+          return await endpoints({
+            contact,
+            endpoint: 'apiSearchUser',
+            thenFunc: (response: any) => {
+              const people = response.data.map((m: any) => ({
+                ...m,
+                text: m.displayname,
+                secondaryText: m.jobtitle,
+                imageUrl: m.picture
+              }));
+              return people;
+            }
+          })
+        },
+      // apiSearchContactsLegal: this.apiSearchContactsLegal.bind(this),
+      apiSearchContactsLegal:
+        async (contact: any) => {
+          return await endpoints({
+            contact,
+            endpoint: 'apiSearchContactsLegal',
+            thenFunc: (response: { data: any; }) => {
+              const people = [response.data].map(m => ({
+                ...m,
+                text: m.displayname,
+                secondaryText: m.jobtitle,
+                imageUrl: m.picture
+              }));
+              return people;
+            }
+          })
+        },
+      // apiContactGroups: this.apiContactGroups.bind(this),
+      apiContactGroups:
+        async () => {
+          return await endpoints({
+            alias: authContext._user.userName,
+            endpoint: 'apiContactGroups',
+            thenFunc: (response: { data: any; }) => {
+              console.log({ response })
+              this.setState({
+                contactGroups: response.data
+              });
+              return response.data;
+            }
+          })
+        },
+      // apiToolManagers: this.apiToolManagers.bind(this),
+      apiToolManagers:
+        async () => {
+          return await endpoints({
+            alias: authContext._user.userName,
+            endpoint: 'apiToolManagers',
+            thenFunc: (response: { data: any; }) => {
+              console.log('apiToolManagers', { response })
+              this.setState({
+                toolManagers: response.data
+              });
+              return response.data;
+            }
+          })
+        },
+      // apiContactGroupsIDAlias: this.apiContactGroupsIDAlias.bind(this),
+      apiContactGroupsIDAlias:
+        async ({ id }: any) => {
+          return await endpoints({
+            id,
+            endpoint: 'apiContactGroupsIDAlias',
+            thenFunc: (response: { data: any; }) => {
+              const contactGroupDetails = [response.data].map(m => ({
+                ...m,
+                'Name': m.name,
+                'Primary Contact': m.primaryContact,
+                'Secondary Contact': m.secondaryContact,
+                'OSS Name': m.ossName,
+                'OSS Contact': m.ossContact,
+                'Leader': m.leader,
+                'Last Updated': m.lastUpdated,
+                'Owner': m.owner,
+                'Last Updated User': m.lastUpdatedUser,
+              }))[0];
+              this.state.setStateHander({
+                contactGroupDetails
+              });
+              console.log('contactGroupDetails', { contactGroupDetails })
+              return contactGroupDetails;
+            }
+          })
+        },
+      apiContactGroupsIDDisplayName:
+        async ({ id }: any) => {
+          this.state.setStateHander({
+            contactGroupDetails: []
+          });
+          return await endpoints({
+            id,
+            endpoint: 'apiContactGroupsIDDisplayName',
+            thenFunc: (response: { data: any; }) => {
+              const contactGroupDetails = [response.data].map(m => ({
+                ...m,
+                'Name': m.name,
+                'Primary Contact': m.primaryContact,
+                'Secondary Contact': m.secondaryContact,
+                'OSS Name': m.ossName,
+                'OSS Contact': m.ossContact,
+                'Leader': m.leader,
+                'Last Updated': m.lastUpdated,
+                'Owner': m.owner,
+                'Last Updated User': m.lastUpdatedUser,
+              }))[0];
+              this.state.setStateHander({
+                contactGroupDetails
+              });
+              console.log('contactGroupDetails', { contactGroupDetails })
+              return contactGroupDetails;
+            }
+          })
+        },
+      // apiToolManagersIDAlias: this.apiToolManagersIDAlias.bind(this),
+      apiToolManagersIDAlias:
+        async ({ id }: any) => {
+          return await endpoints({
+            id, endpoint: 'apiToolManagersIDAlias',
+            thenFunc: (response: any) => {
+              console.log('apiToolManagersIDAlias', { authContext, response })
+              //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
+              const contactGroupDetails = [response.data].map(m => ({
+                ...m,
+                'Tool Manager': m.toolManager,
+                'Added By': m.addedBy,
+                'Last Updated': m.lastUpdated,
+                'Last Updated By': m.lastUpdatedBy
+              }))[0];
+              this.state.setStateHander({
+                contactGroupDetails
+              });
+              return response.data;
+            }
+          })
+        },
+      // apiToolManagersIDDisplayName: this.apiToolManagersIDDisplayName.bind(this),
+      apiToolManagersIDDisplayName:
+        async ({ id }: any) => {
+          return await endpoints({
+            id,
+            endpoint: 'apiToolManagersIDDisplayName',
+            thenFunc: (response: any) => {
+              console.log('apiToolManagersIDDisplayName', { authContext, response })
+              //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
+              const contactGroupDetails = [response.data].map(m => ({
+                ...m,
+                'Tool Manager': m.toolManager,
+                'Added By': m.addedBy,
+                'Last Updated': m.lastUpdated,
+                'Last Updated By': m.lastUpdatedBy
+              }))[0];
+              this.state.setStateHander({
+                contactGroupDetails
+              });
+              return response.data;
+            }
+          })
+        },
+      post:
+        async ({ id, data, endpoint, method }: any) => {
+          console.log('post', { id, data })
+          await endpoints({
+            id,
+            endpoint,
+            method,
+            data,
+            thenFunc: () => {
+              this.state.apiContactGroups()
+              this.state.apiToolManagers()
+            }
+          })
+        },
     };
-    this.apiContactGroups()
-    this.setThings = this.setThings.bind(this);
+    // this.state.apiToolManagers();
+    // this.state.apiContactGroups();
+    // this.state.setStateHander = this.state.setStateHander.bind(this);
     this._isMounted = false;
-    this.apiSearchContactsLegal(authContext._user.userName)
-      .then(people => {
-        this.setThings({
-          // peopleList: people,
-          // currentSelectedItems: people,
-          // mostRecentlyUsed: people,
+    this.state.apiSearchContactsLegal(authContext._user.userName)
+      .then((people: any) => {
+        console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
+        this.setState({
+
           contactList: people
         });
         return people;
       })
-      .catch(function (error) {
+      .catch((error: any) => {
         console.log({ error });
       });
-    this.apiSearchUsers(authContext._user.profile.name)
-      .then(people => {
-        const uniquePeople = people && people.map((m: { mail: any; }) => {
-          return { [m.mail]: m };
-        });
-        const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
-          return m[Object.keys(m)[0]];
-        });
-        this.setThings({
-          // peopleList: [...people]
+    this.state.apiSearchUsers(authContext._user.profile.name)
+      .then((people: any) => {
+        const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
+        const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
+        console.log('===apiSearchUsers', { user: authContext._user.profile, uniquePeople, peopleList })
+        this.setState({
           peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
           peopleList,
-          mostRecentlyUsed: peopleList
-        });
-        this.setThings({
-          currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => {
-            // Object.keys({'a': {'a':'b'}})[0]
-            return m[Object.keys(m)[0]];
-          })
+          mostRecentlyUsed: peopleList,
+          currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
         });
       });
 
-    console.log({ authContext })
     // const apiToolManagersResult = () =>
   }
   componentWillUnmount() {
@@ -101,423 +268,188 @@ class App extends Component<any, any>{
   componentDidMount() {
     this._isMounted = true;
   }
-  setThings(state: any) {
-    console.log('=====setThingssetThingssetThings', { state })
-    this._isMounted && this.setState(state);
-  }
-  async apiSearchUsers(contact: any) {
-    return await endpoints({
-      contact,
-      endpoint: 'apiSearchUser',
-      thenFunc: (response: any) => {
-        const people = response.data.map((m: any) => ({
-          ...m,
-          text: m.displayname,
-          secondaryText: m.jobtitle,
-          imageUrl: m.picture
-        }));
-        return people;
-      }
-    })
-  }
 
-  async apiContactGroupsIDDisplayName({ id }: any) {
-    this.setThings({
-      contactGroupDetails: []
-    });
-    return await endpoints({
-      id,
-      endpoint: 'apiContactGroupsIDDisplayName',
-      thenFunc: (response: { data: any; }) => {
-        const contactGroupDetails = [response.data].map(m => ({
-          ...m,
-          'Name': m.name,
-          'Primary Contact': m.primaryContact,
-          'Secondary Contact': m.secondaryContact,
-          'OSS Name': m.ossName,
-          'OSS Contact': m.ossContact,
-          'Leader': m.leader,
-          'Last Updated': m.lastUpdated,
-          'Owner': m.owner,
-          'Last Updated User': m.lastUpdatedUser,
-        }))[0];
-        this.setThings({
-          contactGroupDetails
-        });
-        console.log('contactGroupDetails', { contactGroupDetails })
-        return contactGroupDetails;
-      }
-    })
-  }
-  async apiContactGroupsIDAlias({ id }: any) {
-    return await endpoints({
-      id,
-      endpoint: 'apiContactGroupsIDAlias',
-      thenFunc: (response: { data: any; }) => {
-        const contactGroupDetails = [response.data].map(m => ({
-          ...m,
-          'Name': m.name,
-          'Primary Contact': m.primaryContact,
-          'Secondary Contact': m.secondaryContact,
-          'OSS Name': m.ossName,
-          'OSS Contact': m.ossContact,
-          'Leader': m.leader,
-          'Last Updated': m.lastUpdated,
-          'Owner': m.owner,
-          'Last Updated User': m.lastUpdatedUser,
-        }))[0];
-        this.setThings({
-          contactGroupDetails
-        });
-        console.log('contactGroupDetails', { contactGroupDetails })
-        return contactGroupDetails;
-      }
-    })
-  }
-
-  async apiSearchContactsLegal(contact: any) {
-    return await endpoints({
-      contact,
-      endpoint: 'apiSearchContactsLegal',
-      thenFunc: (response: { data: any; }) => {
-        const people = [response.data].map(m => ({
-          ...m,
-          text: m.displayname,
-          secondaryText: m.jobtitle,
-          imageUrl: m.picture
-        }));
-        return people;
-      }
-    })
-  }
-
-  async apiContactGroups() {
-    return await endpoints({
-      alias: authContext._user.userName,
-      endpoint: 'apiContactGroups',
-      thenFunc: (response: { data: any; }) => {
-        console.log({ response })
-        this.setState({
-          contactGroups: response.data
-        });
-        return response.data;
-      }
-    })
-  }
-
-  async apiToolManagers() {
-    return await endpoints({
-      alias: authContext._user.userName,
-      endpoint: 'apiToolManagers',
-      thenFunc: (response: { data: any; }) => {
-        console.log('apiToolManagers', { response })
-        this.setState({
-          toolManagers: response.data
-        });
-        return response.data;
-      }
-    })
-  }
-  async isToolManager() {
-    return await endpoints({
-      alias: authContext._user.userName,
-      endpoint: 'apiToolManagersAliasToolManager',
-      thenFunc: (response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
-        console.log('apiToolManagersAliasToolManager', { authContext, response })
-        //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
-        this.setState({
-          isToolManager: response.data
-        });
-        return response.data;
-      }
-    })
-  }
-  async apiToolManagersIDAlias({ id }: any) {
-    return await endpoints({
-      id, endpoint: 'apiToolManagersIDAlias',
-      thenFunc: (response: any) => {
-        console.log('apiToolManagersIDAlias', { authContext, response })
-        //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
-        const contactGroupDetails = [response.data].map(m => ({
-          ...m,
-          'Tool Manager': m.toolManager,
-          'Added By': m.addedBy,
-          'Last Updated': m.lastUpdated,
-          'Last Updated By': m.lastUpdatedBy
-        }))[0];
-        this.setThings({
-          contactGroupDetails
-        });
-        return response.data;
-      }
-    })
-  }
-  async apiToolManagersIDDisplayName({ id }: any) {
-    return await endpoints({
-      id,
-      endpoint: 'apiToolManagersIDDisplayName',
-      thenFunc: (response: any) => {
-        console.log('apiToolManagersIDDisplayName', { authContext, response })
-        //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
-        const contactGroupDetails = [response.data].map(m => ({
-          ...m,
-          'Tool Manager': m.toolManager,
-          'Added By': m.addedBy,
-          'Last Updated': m.lastUpdated,
-          'Last Updated By': m.lastUpdatedBy
-        }))[0];
-        this.setThings({
-          contactGroupDetails
-        });
-        return response.data;
-      }
-    })
-  }
   render() {
     const { route } = this.state;
-    console.log('=========route', { route })
+    console.log('=========route', { route, authContext })
     return (
-      <ErrorBoundary>
-        {
-          {
-            FindYourContact: (
-              <FindYourContact
-                {...this.state}
-                apiSearchUsers={this.apiSearchUsers.bind(this)}
-                apiSearchContactsLegal={this.apiSearchContactsLegal.bind(this)}
-                onRemoveItem={() => {
-                  this.state.setStateHandler({
-                    currentSelectedItems: [],
-                  })
-                }}
-                onItemSelected={(({ name }: { name?: any }) => (selectedItem?: any | undefined) => {
+      <>
+        {false && this.findYourContactPage(route)}
+        {[
 
-                  this.state.setStateHandler({ contactList: undefined })
-                  selectedItem && this.state.setStateHandler({ currentSelectedItems: [selectedItem] })
-                  selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail']).then((data: any) => {
-
-                    console.log('onItemSelected', { name, selectedItem, props: this.state })
-                    this.state.setStateHandler({
+          <FindYourContact
+            {...this.state}
+            apiSearchUsers={this.state.apiSearchUsers.bind(this)}
+            apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)}
+            onRemoveItem={() => {
+              this.setState({
+                currentSelectedItems: [],
+              });
+            }}
+            onItemSelected={
+              (selectedItem?: any | undefined) => {
+                this.setState({ contactList: undefined });
+                selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
+                selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail'])
+                  .then((data: any) => {
+                    console.log('onItemSelected', { name, selectedItem, props: this.state });
+                    this.setState({
                       contactList: data,
                       contactGroupDetails: {
                         ...this.props.contactGroupDetails,
                         [name]: data.mail
-
-                        // ...{
-                        //   "id": ADD ? uuidv1() : data.id,
-                        //   "name": data["Name"],
-                        //   "primaryContact": data["Primary Contact"],
-                        //   "secondaryContact": data["Secondary Contact"],
-                        //   "ossName": data["OSS Name"],
-                        //   "ossContact": data["OSS Contact"],
-                        //   "leader": data["Leader"],
-                        //   "lastUpdated": data["Last Updated"],
-                        //   "owner": data["Owner"],
-                        //   "lastUpdatedUser": data["Last Updated User"],
-                        // }
                       }
-
-                      //             contactGroupDetails: {
-                      //                 ...this.props.contactGroupDetails,
-                      //                 ...{
-                      //     "primaryContact": data["Primary Contact"],
-                      //     "secondaryContact": data["Secondary Contact"],
-                      //     "ossName": data["OSS Name"],
-                      //     "ossContact": data["OSS Contact"],
-                      //     "leader": data["Leader"],
-                      //     "lastUpdated": new Date(),
-                      //     "owner": data["Owner"],
-                      //     "lastUpdatedUser": data["Last Updated User"],
-                      // },
-                      // ...{
-                      //     displayname: "Josh McCall",
-                      //     id: "96e741e8-17fa-4808-b50b-d3fc6fbbdabe",
-                      //     imageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA…",
-                      //     jobtitle: "SOFTWARE ENGINEER",
-                      //     mail: "jomccal@microsoft.com",
-                      //     officelocation: "MILLENNIUM A/1181",
-                      //     picture: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA…",
-                      //     secondaryText: "SOFTWARE ENGINEER",
-                      //     text: "Josh McCall",
-                      // }
-
-                    })
-
-                  })
-                  return selectedItem ? selectedItem : null
-                })({})}
-              />
-            ),
-            TOOL_MANAGERS: [
-              <ToolManagers
-                {...this.state}
-                links={{
-                  ...this.state.links,
-                  // ADD: linkTo('office-ui-fabric-react: Screens', 'New Tool Manager Group'),
-                  // EDIT: linkTo('office-ui-fabric-react: Screens', 'Edit Tool Manager Group'),
-                  // GROUP_DETAILS: linkTo('office-ui-fabric-react: Screens', 'Tool Manager Group Details')
-                }}
-                contactList={
-                  this.state.toolManagers.map((m: { toolManager: any; }) =>
-                    ({
-                      TOOL_MANAGERS: m.toolManager,
-                      ...m
-                    })
-                  )
-                }
-              />
-            ],
-            GROUP_DETAILS: [
-              <ContactGroup
-                title={"Contact Groups"}
-                {...this.state}
-                links={{
-                  ...this.state.links,
-                  // ADD: this.state.links.ADD('_CONTACT_GROUP')
-                }}
-                columns={
-                  [
-                    { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
-                    { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
-                    { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
-                    { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
-                  ]
-                }
-                contactList={
-                  this.state.contactGroups && this.state.contactGroups.map((m: { name: any; primaryContact: any; secondaryContact: any; leader: any; ossName: any; ossContact: any; }) => ({
-                    Name: m.name,
-                    Primary: m.primaryContact,
-                    Secondary: m.secondaryContact,
-                    Lead: m.leader,
-                    OSS_NAME: m.ossName,
-                    OSS_CONTACT: m.ossContact,
-                    ...m
-                  }))
-
-                }
-              />
-            ],
-            ADD_CONTACT_GROUP: [
-              <Group
-                {...this.state}
-                title={'New Contact Group'}
-                links={{
-                  ...this.state.links,
-                  BACK: this.state.links.GROUP_DETAILS,
-                  EDIT: this.state.links.GROUP_DETAILS,
-                }}
-                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
-                CONTACT
-                ADD
-              />
-            ],
-            EDIT_CONTACT_GROUP: [
-              <Group
-                {...this.state}
-                title={'Edit Contact Group'}
-                links={{
-                  ...this.state.links,
-                  BACK: this.state.links.GROUP_DETAILS,
-                  EDIT: () => {
-
-                    this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id })
-                    this.state.links.GROUP_DETAILS()
-                  },
-                }}
-
-                textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
-                groupDetails={this.state.contactGroupDetails}
-                hasGroupDetails
-                CONTACT
-                ADD
-              />],
-
-            VIEW_CONTACT_GROUP: [
-              <Group
-                {...this.state}
-                title={'View Contact Group'}
-                links={{
-                  ...this.state.links,
-                  BACK: this.state.links.GROUP_DETAILS,
-                  EDIT: () => {
-                    this.state.links.EDIT('_CONTACT_GROUP')()
-                    this.state.apiContactGroupsIDDisplayName({ id: this.state.contactGroupDetails.id })
-                  }
-                }}
-                textFields={[
-                  'Name',
-                  'Primary Contact',
-                  'Secondary Contact',
-                  'OSS Name',
-                  'OSS Contact',
-                  'Leader',
-                  'Last Updated',
-                  'Owner',
-                  'Last Updated User',
-                ]}
-                groupDetails={this.state.contactGroupDetails}
-                hasGroupDetails
-                viewOnly
-              />
-            ],
-            ADD_TOOL_MANAGER: [
-              <Group
-                {...this.state}
-                title={'New Group'}
-                links={{
-                  ...this.state.links,
-                  BACK: this.state.links.TOOL_MANAGERS,
-                  EDIT: this.state.links.TOOL_MANAGERS
-                }}
-                textFields={[
-                  'Tool Manager'
-                ]}
-                ADD
-              />],
-
-            EDIT_TOOL_MANAGER: [
-              <Group
-                {...this.state}
-                title={'Edit Group'}
-                links={{
-                  ...this.state.links,
-                  BACK: this.state.links.TOOL_MANAGERS,
-                  EDIT: () => {
-                    this.state.links.TOOL_MANAGERS()
-                    this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id })
-                  }
-                }}
-                textFields={[
-                  'Tool Manager'
-                ]}
-                groupDetails={this.state.contactGroupDetails}
-                ADD
-              />],
-            VIEW_TOOL_MANAGER: [
-              <Group
-                {...this.state}
-                title={'View Group'}
-                links={{
-                  ...this.state.links,
-                  BACK: this.state.links.TOOL_MANAGERS,
-                  EDIT: () => {
-                    this.state.links.EDIT('_TOOL_MANAGER')()
-                    this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id })
-                  }
-                }}
-                textFields={[
-                  'Tool Manager',
-                  'Added By',
-                  'Last Updated',
-                  'Last Updated By'
-                ]}
-                groupDetails={this.state.contactGroupDetails}
-                viewOnly
-              />]
-          }[route]
-        }
-      </ErrorBoundary>
+                    });
+                  });
+                return selectedItem ? selectedItem : null;
+              }
+            }
+          />,
+          <div>2</div>,
+          <div>3</div>,
+          <div>4</div>,
+        ].map((m, i) => <div key={i}>{m}</div>)}
+      </>
     );
+  }
+
+  private findYourContactPage(route: any) {
+    return <ErrorBoundary>
+      {{
+        FindYourContact:
+          (<FindYourContact {...this.state} apiSearchUsers={this.state.apiSearchUsers.bind(this)} apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)} onRemoveItem={() => {
+            this.setState({
+              currentSelectedItems: [],
+            });
+          }} onItemSelected={(({ name }: {
+            name?: any;
+          }) => (selectedItem?: any | undefined) => {
+            this.setState({ contactList: undefined });
+            selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
+            selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail']).then((data: any) => {
+              console.log('onItemSelected', { name, selectedItem, props: this.state });
+              this.setState({
+                contactList: data,
+                contactGroupDetails: {
+                  ...this.props.contactGroupDetails,
+                  [name]: data.mail
+                }
+              });
+            });
+            return selectedItem ? selectedItem : null;
+          })({})} />),
+
+
+        TOOL_MANAGERS: [
+          <ToolManagers {...this.state} links={{
+            ...this.state.links,
+          }} contactList={this.state.toolManagers.map((m: {
+            toolManager: any;
+          }) => ({
+            TOOL_MANAGERS: m.toolManager,
+            ...m
+          }))} />
+        ],
+        GROUP_DETAILS: [
+          <ContactGroup title={"Contact Groups"} {...this.state} links={{
+            ...this.state.links,
+          }} columns={[
+            { fieldName: "Name", key: "Name", minWidth: 70, maxWidth: 70, name: "Name" },
+            { fieldName: "Primary", key: "Primary", minWidth: 70, name: "Primary" },
+            { fieldName: "Lead", key: "Lead", minWidth: 70, maxWidth: 70, name: "Lead" },
+            { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
+          ]} contactList={this.state.contactGroups && this.state.contactGroups.map((m: {
+            name: any;
+            primaryContact: any;
+            secondaryContact: any;
+            leader: any;
+            ossName: any;
+            ossContact: any;
+          }) => ({
+            Name: m.name,
+            Primary: m.primaryContact,
+            Secondary: m.secondaryContact,
+            Lead: m.leader,
+            OSS_NAME: m.ossName,
+            OSS_CONTACT: m.ossContact,
+            ...m
+          }))} />
+        ],
+        ADD_CONTACT_GROUP: [
+          <Group {...this.state} title={'New Contact Group'} links={{
+            ...this.state.links,
+            BACK: this.state.links.GROUP_DETAILS,
+            EDIT: this.state.links.GROUP_DETAILS,
+          }} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} CONTACT ADD />
+        ],
+        EDIT_CONTACT_GROUP: [
+          <Group {...this.state} title={'Edit Contact Group'} links={{
+            ...this.state.links,
+            BACK: this.state.links.GROUP_DETAILS,
+            EDIT: () => {
+              this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
+              this.state.links.GROUP_DETAILS();
+            },
+          }} textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']} groupDetails={this.state.contactGroupDetails} hasGroupDetails CONTACT ADD />
+        ],
+        VIEW_CONTACT_GROUP: [
+          <Group {...this.state} title={'View Contact Group'} links={{
+            ...this.state.links,
+            BACK: this.state.links.GROUP_DETAILS,
+            EDIT: () => {
+              this.state.links.EDIT('_CONTACT_GROUP')();
+              this.state.apiContactGroupsIDDisplayName({ id: this.state.contactGroupDetails.id });
+            }
+          }} textFields={[
+            'Name',
+            'Primary Contact',
+            'Secondary Contact',
+            'OSS Name',
+            'OSS Contact',
+            'Leader',
+            'Last Updated',
+            'Owner',
+            'Last Updated User',
+          ]} groupDetails={this.state.contactGroupDetails} hasGroupDetails viewOnly />
+        ],
+        ADD_TOOL_MANAGER: [
+          <Group {...this.state} title={'New Group'} links={{
+            ...this.state.links,
+            BACK: this.state.links.TOOL_MANAGERS,
+            EDIT: this.state.links.TOOL_MANAGERS
+          }} textFields={[
+            'Tool Manager'
+          ]} ADD />
+        ],
+        EDIT_TOOL_MANAGER: [
+          <Group {...this.state} title={'Edit Group'} links={{
+            ...this.state.links,
+            BACK: this.state.links.TOOL_MANAGERS,
+            EDIT: () => {
+              this.state.links.TOOL_MANAGERS();
+              this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+            }
+          }} textFields={[
+            'Tool Manager'
+          ]} groupDetails={this.state.contactGroupDetails} ADD />
+        ],
+        VIEW_TOOL_MANAGER: [
+          <Group {...this.state} title={'View Group'} links={{
+            ...this.state.links,
+            BACK: this.state.links.TOOL_MANAGERS,
+            EDIT: () => {
+              this.state.links.EDIT('_TOOL_MANAGER')();
+              this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+            }
+          }} textFields={[
+            'Tool Manager',
+            'Added By',
+            'Last Updated',
+            'Last Updated By'
+          ]} groupDetails={this.state.contactGroupDetails} viewOnly />
+        ]
+      }[route]}
+    </ErrorBoundary>;
   }
 }
 
