@@ -81,6 +81,18 @@ export default class extends React.PureComponent<Props>{
             return ({
                 VIEW: () => this.props.apiContactGroupsIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id }),
+                DELETE: () => {
+                    this.props.setStateHandler({
+                        contactGroups: [],
+                        groupDetails: [],
+                        toolManagers: []
+                    })
+                    this.props.post({
+                        id: row.id, method: 'DELETE',
+                        endpoint: 'apiContactGroups',
+
+                    })
+                },
             })[actionType]();
         }
         return (
@@ -122,7 +134,7 @@ export default class extends React.PureComponent<Props>{
                                                 }))
                                             ]}
                                             columns={columns}
-                                            enableShimmer={false}
+                                            enableShimmer={!contactList.length}
                                             onRenderRow={this._onRenderRow}
                                         />
                                     </>]
@@ -166,6 +178,18 @@ export class ToolManagers extends React.PureComponent<Props>{
             return ({
                 VIEW: () => this.props.apiToolManagersIDDisplayName({ id: row.id }),
                 EDIT: () => this.props.apiToolManagersIDAlias({ id: row.id }),
+                DELETE: () => {
+                    this.props.setStateHandler({
+                        contactGroups: [],
+                        groupDetails: [],
+                        toolManagers: []
+                    })
+                    this.props.post({
+                        id: row.id, method: 'DELETE',
+                        endpoint: 'apiToolManagers',
+
+                    })
+                },
             })[actionType]();
         }
         return (
@@ -200,7 +224,7 @@ export class ToolManagers extends React.PureComponent<Props>{
                                                 { fieldName: "TOOL_MANAGERS", key: "TOOL_MANAGERS", minWidth: 170, name: "Tool Managers" },
                                                 { fieldName: "Actions", key: "Actions", minWidth: 90, name: "Actions" }
                                             ]}
-                                            enableShimmer={false}
+                                            enableShimmer={!contactList.length}
                                             onRenderRow={this._onRenderRow}
                                         />]
                                 },
@@ -214,48 +238,7 @@ export class ToolManagers extends React.PureComponent<Props>{
                         />
                     }
                 />
-                {/* <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
-                    <div style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', maxWidth: '400px', }}>
-                        <h1 style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', width: '100%' }}>Tool Managers</h1>
-                        <ShimmeredDetailsList
-                            selectionMode={0}
-                            setKey="items"
-                            styles={{
-                                root: {
-                                    // height: 32,
-                                    // backgroundColor: 'rgb(0, 120, 212)',
-                                    // color: 'white',
-                                    // padding: 0
-                                }
-                            }}
-                            items={[...contactList.map(
-                                (m: any) => ({
-                                    ...m,
-                                    Actions: [
-                                        <ActionButtons m={m} actionOnclick={actionOnclick} links={links} />,
-                                    ],
-                                }))
-                            ]}
-                            columns={[
-                                {
-                                    fieldName: "TOOL_MANAGERS",
-                                    key: "TOOL_MANAGERS",
-                                    minWidth: 170,
-                                    name: "Tool Managers"
-                                },
-                                {
-                                    fieldName: "Actions",
-                                    key: "Actions",
-                                    minWidth: 90,
-                                    name: "Actions"
-                                }
-                            ]}
-                            enableShimmer={false}
-                            onRenderRow={this._onRenderRow}
-                        />
-                        <NavButtons links={links} />
-                    </div>
-                </div> */}
+
             </>
         )
     }

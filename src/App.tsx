@@ -532,12 +532,12 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
   return adalApiFetch(
     axios,
     ({
-      apiContactGroups: `${endpointBaseUrl}/api/ContactGroups/`,
+      apiContactGroups: method === 'DELETE' ? `${endpointBaseUrl}/api/ContactGroups/${id}` : `${endpointBaseUrl}/api/ContactGroups/`,
       apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
       apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
       apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
       apiSearchUser: `${endpointBaseUrl}/api/Search/Users/${contact}`,
-      apiToolManagers: `${endpointBaseUrl}/api/ToolManagers`,
+      apiToolManagers: method === 'DELETE' ? `${endpointBaseUrl}/api/ToolManagers/${id}` : `${endpointBaseUrl}/api/ToolManagers`,
       apiToolManagersAliasToolManager: `${endpointBaseUrl}/api/ToolManagers/${alias}/ToolManager`,
       apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/Alias`,
       apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
