@@ -20,8 +20,43 @@ class App extends Component<any, any>{
       contactList: undefined,
       route: 'FindYourContact',
       links: {
-        HOME: () => this.setState({ route: 'FindYourContact' }),
-        ADD: (param: any) => () => this.setState({ route: `ADD${param}` }),
+        HOME: () => {
+          this.setState({
+            route: 'FindYourContact',
+            currentSelectedItems: [],
+            contactList: []
+          })
+
+          this.state.apiToolManagers();
+          this.state.apiContactGroups();
+          this.state.apiSearchContactsLegal(authContext._user.userName)
+            .then((people: any) => {
+              console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
+              this.setState({
+
+                contactList: people
+              });
+              return people;
+            })
+            .catch((error: any) => {
+              console.log({ error });
+            });
+          this.state.apiSearchUsers(authContext._user.profile.name)
+            .then((people: any) => {
+              const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
+              const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
+              console.log('===apiSearchUsers', { user: authContext._user.profile, uniquePeople, peopleList })
+              this.setState({
+                peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
+                peopleList,
+                mostRecentlyUsed: peopleList,
+                currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
+              });
+            });
+        },
+        ADD: (param: any) => () => {
+          this.setState({ route: `ADD${param}` })
+        },
         // OK: () => this.setState({ route: 'OK' }),
         TOOL_MANAGERS: () => this.setState({ route: 'TOOL_MANAGERS' }),
         GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
@@ -226,34 +261,8 @@ class App extends Component<any, any>{
           })
         },
     };
-    this.state.apiToolManagers();
-    this.state.apiContactGroups();
     this._isMounted = false;
-    this.state.apiSearchContactsLegal(authContext._user.userName)
-      .then((people: any) => {
-        console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
-        this.setState({
-
-          contactList: people
-        });
-        return people;
-      })
-      .catch((error: any) => {
-        console.log({ error });
-      });
-    this.state.apiSearchUsers(authContext._user.profile.name)
-      .then((people: any) => {
-        const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
-        const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
-        console.log('===apiSearchUsers', { user: authContext._user.profile, uniquePeople, peopleList })
-        this.setState({
-          peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
-          peopleList,
-          mostRecentlyUsed: peopleList,
-          currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
-        });
-      });
-
+    this.state.links.HOME()
     // const apiToolManagersResult = () =>
   }
   componentWillUnmount() {
@@ -286,11 +295,11 @@ class App extends Component<any, any>{
                   selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
                   selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail'])
                     .then((data: any) => {
-                      console.log('onItemSelected', { name, selectedItem, props: this.state });
+                      console.log('onItemSelected', { data, name, selectedItem, props: this.state });
                       this.setState({
                         contactList: data,
                         contactGroupDetails: {
-                          ...this.props.contactGroupDetails,
+                          ...this.state.contactGroupDetails,
                           [name]: data.mail
                         }
                       });
