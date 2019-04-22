@@ -309,6 +309,7 @@ export class ActionButtons extends React.PureComponent<Props>{
                     onClick={() => {
                         // actionOnclick('delete', m)
                         // actionOnclick({ actionType: 'DELETE', row: m })()
+                        console.log("===========", { m })
                         links.DELETE(m)
                     }}
                 />
