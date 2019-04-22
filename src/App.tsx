@@ -24,7 +24,8 @@ class App extends Component<any, any>{
           this.setState({
             route: 'FindYourContact',
             currentSelectedItems: [],
-            contactList: []
+            contactList: undefined,
+            toolManagers: []
           })
 
           this.state.apiToolManagers();
@@ -33,7 +34,6 @@ class App extends Component<any, any>{
             .then((people: any) => {
               console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
               this.setState({
-
                 contactList: people
               });
               return people;
@@ -45,7 +45,7 @@ class App extends Component<any, any>{
             .then((people: any) => {
               const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
               const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
-              console.log('===apiSearchUsers', { user: authContext._user.profile, uniquePeople, peopleList })
+              console.log('===apiSearchUsers', { uniquePeople, user: authContext._user.profile, peopleList })
               this.setState({
                 peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
                 peopleList,
@@ -55,13 +55,66 @@ class App extends Component<any, any>{
             });
         },
         ADD: (param: any) => () => {
-          this.setState({ route: `ADD${param}` })
+          this.setState({
+            route: `ADD${param}`,
+            currentSelectedItems: [],
+            contactList: undefined,
+            toolManagers: []
+          })
+          this.state.apiToolManagers();
+          this.state.apiContactGroups();
         },
         // OK: () => this.setState({ route: 'OK' }),
-        TOOL_MANAGERS: () => this.setState({ route: 'TOOL_MANAGERS' }),
-        GROUP_DETAILS: () => this.setState({ route: 'GROUP_DETAILS' }),
-        VIEW: (param: any) => () => this.setState({ route: `VIEW${param}` }),
-        EDIT: (param: any) => () => this.setState({ route: `EDIT${param}` }),
+        TOOL_MANAGERS: () => {
+          this.setState({
+            route: 'TOOL_MANAGERS',
+            currentSelectedItems: [],
+            contactList: [],
+            toolManagers: []
+          })
+          this.state.apiToolManagers();
+          this.state.apiContactGroups();
+        },
+        GROUP_DETAILS: () => {
+          this.setState({
+            route: 'GROUP_DETAILS',
+            currentSelectedItems: [],
+            contactList: [],
+            toolManagers: []
+          })
+          this.state.apiToolManagers();
+          this.state.apiContactGroups();
+        },
+        VIEW: (param: any) => () => {
+          this.setState({
+            route: `VIEW${param}`,
+            currentSelectedItems: [],
+            contactList: [],
+            toolManagers: []
+          })
+        },
+        EDIT: (param: any) => () => {
+          this.setState({
+            route: `EDIT${param}`,
+            currentSelectedItems: [],
+            contactList: [],
+            toolManagers: []
+          })
+
+          // this.state.apiSearchUsers(authContext._user.profile.name)
+          //   .then((people: any) => {
+          //     const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
+          //     const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
+          //     console.log('===apiSearchUsers', { uniquePeople, user: authContext._user.profile, peopleList })
+          //     this.setState({
+          //       peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
+          //       peopleList,
+          //       mostRecentlyUsed: peopleList,
+          //       currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
+          //     });
+          //   });
+          // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+        },
         DELETE: (param: any) => () => console.log('DELETE'),
       },
       setState: (state: any) => this.setState(state),
@@ -440,27 +493,29 @@ class App extends Component<any, any>{
               groupDetails={this.state.contactGroupDetails}
               ADD
             />,
-            route === 'EDIT_TOOL_MANAGER' &&
-            <Group
-              {...this.state}
-              title={'View Group'}
-              links={{
-                ...this.state.links,
-                BACK: this.state.links.TOOL_MANAGERS,
-                EDIT: () => {
-                  this.state.links.EDIT('_TOOL_MANAGER')();
-                  this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
-                }
-              }}
-              textFields={[
-                'Tool Manager',
-                'Added By',
-                'Last Updated',
-                'Last Updated By'
-              ]}
-              groupDetails={this.state.contactGroupDetails}
-              viewOnly
-            />,
+            // route === 'EDIT_TOOL_MANAGER' &&
+            // <Group
+            //   {...this.state}
+            //   title={'View Group'}
+            //   links={{
+            //     ...this.state.links,
+            //     BACK: this.state.links.TOOL_MANAGERS,
+            //     EDIT: () => {
+            //       this.state.links.EDIT('_TOOL_MANAGER')();
+            //       this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+            //     }
+            //   }}
+            //   textFields={[
+            //     'Tool Manager',
+            //     'Added By',
+            //     'Last Updated',
+            //     'Last Updated By'
+            //   ]}
+            //   groupDetails={this.state.contactGroupDetails}
+            //   viewOnly
+            //   hasGroupDetails
+            //   ADD
+            // />,
             route === 'VIEW_TOOL_MANAGER' &&
             <Group
               {...this.state}
@@ -470,7 +525,6 @@ class App extends Component<any, any>{
                 BACK: this.state.links.TOOL_MANAGERS,
                 EDIT: () => {
                   this.state.links.EDIT('_TOOL_MANAGER')();
-                  this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
                 }
               }}
               textFields={[

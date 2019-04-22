@@ -375,7 +375,7 @@ export class Group extends React.PureComponent<Props>{
             })
         }
         const onSave = ({ data }: any) => {
-            console.log('onClick', { data })
+            console.log('onClick', { data, props: this.props })
             this.props.post(
                 {
                     id: ADD ? uuidv1() : data.id,
@@ -387,13 +387,13 @@ export class Group extends React.PureComponent<Props>{
                         "ossName": data["OSS Name"],
                         "ossContact": data["OSS Contact"],
                         "leader": data["Leader"],
-                        "lastUpdated": data["Last Updated"],
+                        "lastUpdated": ADD ? new Date() : data["Last Updated"],
                         "owner": data["Owner"],
-                        "lastUpdatedUser": data["Last Updated User"],
+                        "lastUpdatedUser": ADD ? authContext._user.userName : data["Last Updated User"],
                     } :
                         {
                             id: ADD ? uuidv1() : data.id,
-                            "toolManager": "harezk@microsoft.com",
+                            "toolManager": this.props.contactGroupDetails['Tool Manager'],
                             "addedBy": authContext._user.userName,
                             "lastUpdated": new Date(),
                             "lastUpdatedBy": authContext._user.userName
