@@ -37,7 +37,6 @@ class App extends Component<any, any>{
             .then((people: any) => {
               const peopleListObject = { ...this.state.peopleListObject, ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m })) }
               const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
-              console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
               this.setState({
                 peopleListObject,
                 peopleList,
@@ -84,10 +83,6 @@ class App extends Component<any, any>{
           this.state.apiContactGroups();
         },
         VIEW: (param: any) => (row: any) => {
-          console.log('===view', { param, row })
-          console.log('===view', { param, row })
-          console.log('===view', { param, row })
-          console.log('===view', { param, row })
           this.setState({
             route: `VIEW${param}`,
             currentSelectedItems: [],
@@ -107,7 +102,6 @@ class App extends Component<any, any>{
           // this.props.apiContactGroupsIDDisplayName({ id: row.id })
         },
         EDIT: (param: any) => (row: any) => {
-          console.log(`===EDIT${param}`, { param, row, state: this.state, user: authContext._user.profile })
           this.setState({
             route: `EDIT${param}`,
             currentSelectedItems: undefined,
@@ -130,7 +124,6 @@ class App extends Component<any, any>{
                         ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m }))
                       }
                       const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
-                      console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
                       this.setState({
                         peopleListObject,
                         peopleList,
@@ -163,7 +156,6 @@ class App extends Component<any, any>{
                         ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m }))
                       }
                       const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
-                      console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
                       this.setState({
                         peopleListObject,
                         peopleList,
@@ -203,7 +195,6 @@ class App extends Component<any, any>{
 
             })
           }
-          console.log('DELETE')
         }
       },
       setState: (state: any) => this.setState(state),
@@ -214,7 +205,6 @@ class App extends Component<any, any>{
             alias: authContext._user.userName,
             endpoint: 'apiToolManagersAliasToolManager',
             thenFunc: (response: { data: { filter: (arg0: (m: any) => boolean) => { length: any; }; }; }) => {
-              console.log('apiToolManagersAliasToolManager', { authContext, response })
               //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
               this.setState({
                 isToolManager: response.data
@@ -258,7 +248,6 @@ class App extends Component<any, any>{
             }
           })
             .then((people: any) => {
-              console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
               this.setState({
                 contactList: people
               });
@@ -275,7 +264,6 @@ class App extends Component<any, any>{
             alias: authContext._user.userName,
             endpoint: 'apiContactGroups',
             thenFunc: (response: { data: any; }) => {
-              console.log({ response })
               this.setState({
                 contactGroups: response.data
               });
@@ -290,7 +278,6 @@ class App extends Component<any, any>{
             alias: authContext._user.userName,
             endpoint: 'apiToolManagers',
             thenFunc: (response: { data: any; }) => {
-              console.log('apiToolManagers', { response })
               this.setState({
                 toolManagers: response.data
               });
@@ -320,7 +307,6 @@ class App extends Component<any, any>{
               this.setState({
                 contactGroupDetails
               });
-              console.log('contactGroupDetails', { contactGroupDetails })
               return contactGroupDetails;
             }
           })
@@ -349,7 +335,6 @@ class App extends Component<any, any>{
               this.setState({
                 contactGroupDetails
               });
-              console.log('contactGroupDetails', { contactGroupDetails })
               return contactGroupDetails;
             }
           })
@@ -360,7 +345,6 @@ class App extends Component<any, any>{
           return await endpoints({
             id, endpoint: 'apiToolManagersIDAlias',
             thenFunc: (response: any) => {
-              console.log('apiToolManagersIDAlias', { authContext, response })
               //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
               const contactGroupDetails = [response.data].map(m => ({
                 ...m,
@@ -383,7 +367,6 @@ class App extends Component<any, any>{
             id,
             endpoint: 'apiToolManagersIDDisplayName',
             thenFunc: (response: any) => {
-              console.log('apiToolManagersIDDisplayName', { authContext, response })
               //   const isToolManager = !!response.data.filter((m: { toolManager: any; }) => m.toolManager === authContext._user.profile.mail).length;
               const contactGroupDetails = [response.data].map(m => ({
                 ...m,
@@ -401,7 +384,6 @@ class App extends Component<any, any>{
         },
       post:
         async ({ id, data, endpoint, method }: any) => {
-          console.log('post', { id, data })
           await endpoints({
             id,
             endpoint,
@@ -427,7 +409,6 @@ class App extends Component<any, any>{
 
   render() {
     const { route } = this.state;
-    console.log('=========route', { route, authContext, state: this.state })
     return (
       <ErrorBoundary>
         <>
@@ -453,7 +434,6 @@ class App extends Component<any, any>{
                   });
                   selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail'])
                     .then((data: any) => {
-                      console.log('onItemSelected', { data, name, selectedItem, props: this.state });
                       this.setState({
                         contactList: data,
                         contactGroupDetails: {
@@ -504,7 +484,6 @@ class App extends Component<any, any>{
                 ...this.state.links,
                 BACK: this.state.links.GROUP_DETAILS,
                 EDIT: (data: any) => {
-                  console.log('onClick', { data, props: this.props })
                   this.state.post(
                     {
                       id: uuid(),
@@ -646,7 +625,6 @@ class App extends Component<any, any>{
                 ...this.state.links,
                 BACK: this.state.links.TOOL_MANAGERS,
                 EDIT: (data: any) => {
-                  console.log('onClick', { data, props: this.props })
                   this.state.post(
                     {
                       id: uuid(),
@@ -697,7 +675,6 @@ class App extends Component<any, any>{
                 ...this.state.links,
                 BACK: this.state.links.TOOL_MANAGERS,
                 EDIT: (data: any) => {
-                  console.log('onClick', { data, props: this.props })
                   this.state.post(
                     {
                       id: data.id,
@@ -789,7 +766,6 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
     apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/alias`,
     apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
   })[endpoint];
-  console.log(' ===== endpoints', { endpointUri, alias, id, endpoint, config })
   return adalApiFetch(
     axios,
     endpointUri,

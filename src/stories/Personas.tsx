@@ -28,7 +28,6 @@ export class PersonaBadge extends React.Component<PersonProps> {
                         data-automation-id="test"
                         allowDisabledFocus={true}
                         style={{ width: '100%', marginTop: 10, marginBottom: 16 }}
-                        onClick={() => console.log('clicked')}
                     />
                 </a>
             </>

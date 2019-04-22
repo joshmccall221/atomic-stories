@@ -167,7 +167,6 @@ export class ToolManagers extends React.PureComponent<Props>{
     render() {
         const { contactList, links } = this.props;
         const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
-            console.log('ToolManagersactionOnclick', { props: this.props, actionType, row, id: row.id })
             this.props.setState({ contactGroupDetails: undefined })
             return ({
                 VIEW: () => this.props.apiToolManagersIDDisplayName({ id: row.id }),
@@ -309,7 +308,6 @@ export class ActionButtons extends React.PureComponent<Props>{
                     onClick={() => {
                         // actionOnclick('delete', m)
                         // actionOnclick({ actionType: 'DELETE', row: m })()
-                        console.log("===========", { m })
                         links.DELETE(m)
                     }}
                 />
@@ -363,9 +361,7 @@ export class NavButtons extends React.PureComponent<Props>{
 export class Group extends React.PureComponent<Props>{
     render() {
         const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails, ADD } = this.props;
-        console.log('!!!!!!!!!!!!!!Group', this.props)
         const onChange = (label: any) => (m: any) => {
-            console.log('onChange', { label, m, groupDetails })
             this.props.setState({
                 contactGroupDetails: {
                     ...this.props.contactGroupDetails,
@@ -409,7 +405,6 @@ export class Group extends React.PureComponent<Props>{
                                                 currentSelectedItems={this.props.currentSelectedItems && this.props.currentSelectedItems[m]}
                                                 onRemoveItem={(({ name }: any) => (selectedItem?: any | undefined) => {
 
-                                                    console.log('onRemoveItem', { name, selectedItem, props: this.props })
                                                     selectedItem && this.props.setState({
                                                         currentSelectedItems: { [name]: [] },
                                                         contactGroupDetails: {
@@ -426,7 +421,6 @@ export class Group extends React.PureComponent<Props>{
                                                     (({ name }: any) => (selectedItem?: any | undefined) => {
 
                                                         // this.props.setState({ contactList: undefined })
-                                                        console.log('onItemSelected', { name, selectedItem, props: this.props })
                                                         selectedItem && this.props.setState({
                                                             currentSelectedItems: { [name]: [selectedItem] },
                                                             contactGroupDetails: {

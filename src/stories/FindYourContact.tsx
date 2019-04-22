@@ -22,7 +22,6 @@ export class Test extends React.PureComponent {
 export default class extends BaseComponent<FindYourContactProps> {
     render() {
         const { currentSelectedItems, mostRecentlyUsed, peopleList, groups } = this.props
-        console.log({ FindYourContactProps: this.props, isToolManager: this.props.isToolManager })
         return (
             <>
                 {[
@@ -88,7 +87,6 @@ export default class extends BaseComponent<FindYourContactProps> {
                                             ariaLabel="Management"
                                             onClick={() => {
 
-                                                console.log('settings onclick')
                                                 !this.props.contactGroups.length && this.props.apiContactGroups()
                                                 !this.props.toolManagers && this.props.apiToolManagers()
                                                 this.props.links.GROUP_DETAILS()

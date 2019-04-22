@@ -71,11 +71,8 @@ export default class extends React.Component<IPeoplePickerExampleProps
                     onRemoveSuggestion={this._onRemoveSuggestion}
                     onValidateInput={this._validateInput}
                     inputProps={{
-                        onChange: (props) => console.log('======onChange', { props }),
-                        onBlur: () => console.log('onBlur called'),
                         label: 'test',
                         onFocus: () => {
-                            console.log('onFocus called', { ...this.props })
                             if (this.props.currentSelectedItems) {
                                 this.props.setState({ currentSelectedItems: [] })
                             }
@@ -148,7 +145,6 @@ export default class extends React.Component<IPeoplePickerExampleProps
         filterText: string,
         currentPersonas?: IPersonaProps[],
     ): IPersonaProps[] | Promise<IPersonaProps[]> => {
-        console.log("_onFilterChanged", { filterText, props: this.props })
         if (filterText) {
             const results = this.props.apiSearchUsers(filterText)
             return results;
