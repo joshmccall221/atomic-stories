@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { ShimmeredDetailsList, IDetailsRowProps, IDetailsRowStyles, DetailsRow, getTheme, IconButton, TextField, Button, Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import FindYourContact, { PersonProps } from './FindYourContact';
-const uuidv1 = require('uuid/v1');
-const { authContext } = require('../adalConfig');
+
 
 export type Props = { contactList: PersonProps[]; } & any;
 
@@ -71,26 +70,26 @@ export default class extends React.PureComponent<Props>{
     render() {
         const { contactList, links, title, columns } = this.props;
         // console.log('contact group', this.props)
-        const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
-            // console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
-            this.props.setState({ contactGroupDetails: undefined })
-            return ({
-                VIEW: () => this.props.apiContactGroupsIDDisplayName({ id: row.id }),
-                EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id }),
-                DELETE: () => {
-                    this.props.setState({
-                        contactGroups: [],
-                        groupDetails: [],
-                        toolManagers: []
-                    })
-                    this.props.post({
-                        id: row.id, method: 'DELETE',
-                        endpoint: 'apiContactGroups',
+        // const actionOnclick = ({ actionType, row }: { actionType: string, row: any }) => () => {
+        //     // console.log('actionOnclick', { props: this.props, actionType, row, id: row.id })
+        //     this.props.setState({ contactGroupDetails: undefined })
+        //     return ({
+        //         VIEW: () => this.props.apiContactGroupsIDDisplayName({ id: row.id }),
+        //         EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id }),
+        //         DELETE: () => {
+        //             this.props.setState({
+        //                 contactGroups: [],
+        //                 groupDetails: [],
+        //                 toolManagers: []
+        //             })
+        //             this.props.post({
+        //                 id: row.id, method: 'DELETE',
+        //                 endpoint: 'apiContactGroups',
 
-                    })
-                },
-            })[actionType]();
-        }
+        //             })
+        //         },
+        //     })[actionType]();
+        // }
         return (
             <Layout
                 title={title}
@@ -119,7 +118,7 @@ export default class extends React.PureComponent<Props>{
                                                         {...{ ...this.props }}
                                                         key={i}
                                                         m={m}
-                                                        actionOnclick={actionOnclick}
+                                                        // actionOnclick={actionOnclick}
                                                         links={{
                                                             ...links,
                                                             ...{ VIEW: links.VIEW('_CONTACT_GROUP') },
@@ -253,7 +252,7 @@ export class ToolManagers extends React.PureComponent<Props>{
 }
 export class ActionButtons extends React.PureComponent<Props>{
     render() {
-        const { actionOnclick, m, links } = this.props;
+        const { m, links } = this.props;
         // console.log('ActionButtons', this.props)
         return (
             <section >
@@ -271,8 +270,8 @@ export class ActionButtons extends React.PureComponent<Props>{
                     title="edit"
                     ariaLabel="edit"
                     onClick={() => {
-                        actionOnclick({ actionType: 'EDIT', row: m })()
-                        links.EDIT()
+                        // actionOnclick({ actionType: 'EDIT', row: m })()
+                        links.EDIT(m)
                     }}
                 />
                 <IconButton
@@ -290,8 +289,8 @@ export class ActionButtons extends React.PureComponent<Props>{
                     ariaLabel="read"
                     onClick={() => {
                         // actionOnclick('read', m)
-                        actionOnclick({ actionType: 'VIEW', row: m })()
-                        links.VIEW()
+                        // actionOnclick({ actionType: 'VIEW', row: m })()
+                        links.VIEW(m)
                     }}
                 />
                 <IconButton
@@ -309,8 +308,8 @@ export class ActionButtons extends React.PureComponent<Props>{
                     ariaLabel="delete"
                     onClick={() => {
                         // actionOnclick('delete', m)
-                        actionOnclick({ actionType: 'DELETE', row: m })()
-                        links.DELETE()
+                        // actionOnclick({ actionType: 'DELETE', row: m })()
+                        links.DELETE(m)
                     }}
                 />
             </section>
@@ -362,7 +361,7 @@ export class NavButtons extends React.PureComponent<Props>{
 }
 export class Group extends React.PureComponent<Props>{
     render() {
-        const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails, ADD, CONTACT } = this.props;
+        const { links, textFields, viewOnly, groupDetails, title, hasGroupDetails, ADD } = this.props;
         console.log('!!!!!!!!!!!!!!Group', this.props)
         const onChange = (label: any) => (m: any) => {
             console.log('onChange', { label, m, groupDetails })
@@ -374,41 +373,41 @@ export class Group extends React.PureComponent<Props>{
                 }
             })
         }
-        const onSave = ({ data }: any) => {
-            console.log('onClick', { data, props: this.props })
-            this.props.post(
-                {
-                    id: ADD ? uuidv1() : data.id,
-                    data: CONTACT ? {
-                        "id": ADD ? uuidv1() : data.id,
-                        "name": data["Name"],
-                        "primaryContact": data["Primary Contact"],
-                        "secondaryContact": data["Secondary Contact"],
-                        "ossName": data["OSS Name"],
-                        "ossContact": data["OSS Contact"],
-                        "leader": data["Leader"],
-                        "lastUpdated": ADD ? new Date() : data["Last Updated"],
-                        "owner": data["Owner"],
-                        "lastUpdatedUser": ADD ? authContext._user.userName : data["Last Updated User"],
-                    } :
-                        {
-                            id: ADD ? uuidv1() : data.id,
-                            "toolManager": this.props.contactGroupDetails['Tool Manager'],
-                            "addedBy": authContext._user.userName,
-                            "lastUpdated": new Date(),
-                            "lastUpdatedBy": authContext._user.userName
-                        }
-                    ,
-                    endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
-                })
-            this.props.setState({
-                contactGroups: [],
-                groupDetails: [],
-                toolManagers: []
-            })
-            // this.props.apiContactGroups()
-            // this.props.apiToolManagers()
-        }
+        // const onSave = ({ data }: any) => {
+        //     console.log('onClick', { data, props: this.props })
+        //     this.props.post(
+        //         {
+        //             id: ADD ? uuidv1() : data.id,
+        //             data: CONTACT ? {
+        //                 "id": ADD ? uuidv1() : data.id,
+        //                 "name": data["Name"],
+        //                 "primaryContact": data["Primary Contact"],
+        //                 "secondaryContact": data["Secondary Contact"],
+        //                 "ossName": data["OSS Name"],
+        //                 "ossContact": data["OSS Contact"],
+        //                 "leader": data["Leader"],
+        //                 "lastUpdated": ADD ? new Date() : data["Last Updated"],
+        //                 "owner": data["Owner"],
+        //                 "lastUpdatedUser": ADD ? authContext._user.userName : data["Last Updated User"],
+        //             } :
+        //                 {
+        //                     id: ADD ? uuidv1() : data.id,
+        //                     "toolManager": this.props.contactGroupDetails['Tool Manager'],
+        //                     "addedBy": authContext._user.userName,
+        //                     "lastUpdated": new Date(),
+        //                     "lastUpdatedBy": authContext._user.userName
+        //                 }
+        //             ,
+        //             endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
+        //         })
+        //     this.props.setState({
+        //         contactGroups: [],
+        //         groupDetails: [],
+        //         toolManagers: []
+        //     })
+        //     // this.props.apiContactGroups()
+        //     // this.props.apiToolManagers()
+        // }
         return (
             <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
                 <h1 style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', width: '100%' }}>{title}</h1>
@@ -536,7 +535,7 @@ export class Group extends React.PureComponent<Props>{
                                 console.log('onClick', this.props.contactGroupDetails)
                                 // this.props.post({ id: groupDetails.id, data: groupDetails })
 
-                                onSave({ data: this.props.contactGroupDetails })
+                                // onSave({ data: this.props.contactGroupDetails })
                                 links.EDIT()
 
                             }}

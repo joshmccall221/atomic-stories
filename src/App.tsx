@@ -54,16 +54,6 @@ class App extends Component<any, any>{
               });
             });
         },
-        ADD: (param: any) => () => {
-          this.setState({
-            route: `ADD${param}`,
-            currentSelectedItems: [],
-            contactList: undefined,
-            toolManagers: []
-          })
-          this.state.apiToolManagers();
-          this.state.apiContactGroups();
-        },
         // OK: () => this.setState({ route: 'OK' }),
         TOOL_MANAGERS: () => {
           this.setState({
@@ -85,37 +75,101 @@ class App extends Component<any, any>{
           this.state.apiToolManagers();
           this.state.apiContactGroups();
         },
-        VIEW: (param: any) => () => {
+        ADD: (param: any) => () => {
+          this.setState({
+            route: `ADD${param}`,
+            currentSelectedItems: [],
+            contactList: undefined,
+            toolManagers: [],
+            contactGroupDetails: undefined
+          })
+          this.state.apiToolManagers();
+          this.state.apiContactGroups();
+        },
+        VIEW: (param: any) => (row: any) => {
+          console.log('===view', { param, row })
+          console.log('===view', { param, row })
+          console.log('===view', { param, row })
+          console.log('===view', { param, row })
           this.setState({
             route: `VIEW${param}`,
             currentSelectedItems: [],
             contactList: [],
-            toolManagers: []
+            toolManagers: [],
+            contactGroupDetails: undefined
           })
+
+          if (param === "_CONTACT_GROUP") {
+
+            this.state.apiContactGroupsIDDisplayName({ id: row.id })
+          }
+          if (param === "_TOOL_MANAGER") {
+            this.state.apiToolManagersIDDisplayName({ id: row.id })
+          }
+          // EDIT: () => this.props.apiContactGroupsIDAlias({ id: row.id })
+          // this.props.apiContactGroupsIDDisplayName({ id: row.id })
         },
-        EDIT: (param: any) => () => {
+        EDIT: (param: any) => (row: any) => {
+          console.log(`===EDIT${param}`, { param, row, state: this.state, user: authContext._user.profile })
           this.setState({
             route: `EDIT${param}`,
-            currentSelectedItems: [],
+            currentSelectedItems: undefined,
             contactList: [],
             toolManagers: []
           })
+          if (param === "_CONTACT_GROUP") {
+            this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id })
+          }
+          if (param === "_TOOL_MANAGER") {
+            // this.state.apiToolManagersIDDisplayName({ id: row.id })
 
-          // this.state.apiSearchUsers(authContext._user.profile.name)
-          //   .then((people: any) => {
-          //     const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
-          //     const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
-          //     console.log('===apiSearchUsers', { uniquePeople, user: authContext._user.profile, peopleList })
-          //     this.setState({
-          //       peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
-          //       peopleList,
-          //       mostRecentlyUsed: peopleList,
-          //       currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
-          //     });
-          //   });
+            this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+
+            [
+              'Primary Contact',
+              'Secondary Contact',
+              'Leader',
+              // 'Owner',
+              // 'Tool Manager',
+            ].map((m: any) => {
+              // console.log('onChange', { label, m, groupDetails })
+
+              // this.state.apiSearchUsers(this.state.groupDetails[m])
+              //   .then((people: any) => {
+              //     const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
+              //     const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
+              //     console.log(`===EDIT${param} - apiSearchUsers`, { uniquePeople, peopleList, user: authContext._user.profile, state: this.state })
+              //     // this.setState({
+              //     //   currentSelectedItems: {
+              //     //     ...this.state.currentSelectedItems,
+              //     //     [m]: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
+              //     //   }
+              //     // })
+              //     // this.setState({
+              //     //   // peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
+              //     //   // peopleList,
+              //     //   // mostRecentlyUsed: peopleList,
+              //     //   currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
+              //     // });
+              //   });
+            })
+          }
           // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
         },
-        DELETE: (param: any) => () => console.log('DELETE'),
+        DELETE: () => (row: any) => {
+
+          this.props.setState({
+            contactGroups: [],
+            groupDetails: [],
+            toolManagers: []
+          })
+          this.props.post({
+            id: row.id, method: 'DELETE',
+            endpoint: 'apiToolManagers',
+
+          })
+          console.log('DELETE')
+        }
       },
       setState: (state: any) => this.setState(state),
       // isToolManager: this.isToolManager(),
@@ -327,7 +381,7 @@ class App extends Component<any, any>{
 
   render() {
     const { route } = this.state;
-    console.log('=========route', { route, authContext })
+    console.log('=========route', { route, authContext, state: this.state })
     return (
       <ErrorBoundary>
         <>
