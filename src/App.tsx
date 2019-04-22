@@ -23,36 +23,27 @@ class App extends Component<any, any>{
         HOME: () => {
           this.setState({
             route: 'FindYourContact',
-            currentSelectedItems: [],
+            currentSelectedItems: undefined,
             contactList: undefined,
-            toolManagers: []
+            toolManagers: undefined
           })
-
           this.state.apiToolManagers();
           this.state.apiContactGroups();
-          this.state.apiSearchContactsLegal(authContext._user.userName)
-            .then((people: any) => {
-              console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
-              this.setState({
-                contactList: people
-              });
-              return people;
-            })
-            .catch((error: any) => {
-              console.log({ error });
-            });
           this.state.apiSearchUsers(authContext._user.profile.name)
             .then((people: any) => {
-              const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
-              const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
-              console.log('===apiSearchUsers', { uniquePeople, user: authContext._user.profile, peopleList })
+              const peopleListObject = { ...this.state.peopleListObject, ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m })) }
+              const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
+              console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
               this.setState({
-                peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
+                peopleListObject,
                 peopleList,
                 mostRecentlyUsed: peopleList,
-                currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
+                currentSelectedItems: {
+                  main: peopleList
+                }
               });
             });
+          this.state.apiSearchContactsLegal(authContext._user.userName);
         },
         // OK: () => this.setState({ route: 'OK' }),
         TOOL_MANAGERS: () => {
@@ -118,41 +109,46 @@ class App extends Component<any, any>{
             toolManagers: []
           })
           if (param === "_CONTACT_GROUP") {
-            this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id })
+            this.state.apiContactGroupsIDAlias({ id: row.id })
+              .then((contactGroupsIDAlias: any) => {
+
+
+                console.log('=====================', { contactGroupsIDAlias });
+                console.log('=====================', { contactGroupsIDAlias });
+                console.log('=====================', { contactGroupsIDAlias: contactGroupsIDAlias });
+
+                [
+                  'Primary Contact',
+                  'Secondary Contact',
+                  'Leader',
+                ].map((m: any) => {
+                  console.log('=====================', { contactGroupsIDAlias, m: contactGroupsIDAlias[m] });
+
+                  this.state.apiSearchUsers(contactGroupsIDAlias[m])
+                    .then((people: any) => {
+                      const peopleListObject = { ...this.state.peopleListObject, ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m })) }
+                      const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
+                      console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
+                      this.setState({
+                        peopleListObject,
+                        peopleList,
+                        mostRecentlyUsed: peopleList,
+                        currentSelectedItems: {
+                          ...this.state.currentSelectedItems,
+                          [m]: peopleList
+                        }
+                      });
+                    });
+                })
+              });
+
           }
           if (param === "_TOOL_MANAGER") {
             // this.state.apiToolManagersIDDisplayName({ id: row.id })
 
-            this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
+            // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
 
-            [
-              'Primary Contact',
-              'Secondary Contact',
-              'Leader',
-              // 'Owner',
-              // 'Tool Manager',
-            ].map((m: any) => {
-              // console.log('onChange', { label, m, groupDetails })
 
-              // this.state.apiSearchUsers(this.state.groupDetails[m])
-              //   .then((people: any) => {
-              //     const uniquePeople = people && people.map((m: { mail: any; }) => ({ [m.mail]: m }));
-              //     const peopleList = Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => m[Object.keys(m)[0]]);
-              //     console.log(`===EDIT${param} - apiSearchUsers`, { uniquePeople, peopleList, user: authContext._user.profile, state: this.state })
-              //     // this.setState({
-              //     //   currentSelectedItems: {
-              //     //     ...this.state.currentSelectedItems,
-              //     //     [m]: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
-              //     //   }
-              //     // })
-              //     // this.setState({
-              //     //   // peopleListObject: { ...this.state.peopleListObject, ...uniquePeople },
-              //     //   // peopleList,
-              //     //   // mostRecentlyUsed: peopleList,
-              //     //   currentSelectedItems: Object.values({ ...this.state.peopleListObject, ...uniquePeople }).map(m => { return m[Object.keys(m)[0]]; })
-              //     // });
-              //   });
-            })
           }
           // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
         },
@@ -190,7 +186,7 @@ class App extends Component<any, any>{
         },
       // apiSearchUsers: this.apiSearchUsers.bind(this),
       apiSearchUsers:
-        async (contact: any) => {
+        async (contact: any, key: any) => {
           return await endpoints({
             contact,
             endpoint: 'apiSearchUser',
@@ -204,6 +200,7 @@ class App extends Component<any, any>{
               return people;
             }
           })
+
         },
       // apiSearchContactsLegal: this.apiSearchContactsLegal.bind(this),
       apiSearchContactsLegal:
@@ -221,6 +218,16 @@ class App extends Component<any, any>{
               return people;
             }
           })
+            .then((people: any) => {
+              console.log('===apiSearchContactsLegal', { people, user: authContext._user.profile, })
+              this.setState({
+                contactList: people
+              });
+              return people;
+            })
+            .catch((error: any) => {
+              console.log({ error });
+            })
         },
       // apiContactGroups: this.apiContactGroups.bind(this),
       apiContactGroups:
@@ -393,13 +400,18 @@ class App extends Component<any, any>{
               apiSearchContactsLegal={this.state.apiSearchContactsLegal.bind(this)}
               onRemoveItem={() => {
                 this.setState({
-                  currentSelectedItems: [],
+                  currentSelectedItems: { main: [] },
                 });
               }}
+              currentSelectedItems={this.state.currentSelectedItems && this.state.currentSelectedItems.main}
               onItemSelected={
                 (selectedItem?: any | undefined) => {
                   this.setState({ contactList: undefined });
-                  selectedItem && this.setState({ currentSelectedItems: [selectedItem] });
+                  selectedItem && this.setState({
+                    currentSelectedItems: {
+                      main: [selectedItem]
+                    }
+                  });
                   selectedItem && this.state.apiSearchContactsLegal((selectedItem as any)['mail'])
                     .then((data: any) => {
                       console.log('onItemSelected', { data, name, selectedItem, props: this.state });
@@ -618,7 +630,7 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
       apiSearchUser: `${endpointBaseUrl}/api/Search/Users/${contact}`,
       apiToolManagers: method === 'DELETE' ? `${endpointBaseUrl}/api/ToolManagers/${id}` : `${endpointBaseUrl}/api/ToolManagers`,
       apiToolManagersAliasToolManager: `${endpointBaseUrl}/api/ToolManagers/${alias}/ToolManager`,
-      apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/Alias`,
+      apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/alias`,
       apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,
     })[endpoint],
     config

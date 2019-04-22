@@ -367,7 +367,6 @@ export class Group extends React.PureComponent<Props>{
             console.log('onChange', { label, m, groupDetails })
             this.props.setState({
                 contactGroupDetails: {
-                    // ...groupDetails,
                     ...this.props.contactGroupDetails,
                     [label]: m
                 }
