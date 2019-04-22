@@ -4,6 +4,7 @@ import FindYourContact from './stories/FindYourContact';
 import axios from 'axios';
 import ContactGroup, { Group, ToolManagers } from './stories/TableView';
 const { authContext, adalApiFetch } = require('./adalConfig');
+const uuid = require('uuid');
 
 class App extends Component<any, any>{
   _isMounted: boolean;
@@ -25,7 +26,10 @@ class App extends Component<any, any>{
             route: 'FindYourContact',
             currentSelectedItems: undefined,
             contactList: undefined,
-            toolManagers: undefined
+            toolManagers: undefined,
+            contactGroupDetails: undefined,
+            contactGroups: undefined,
+            groupDetails: undefined,
           })
           this.state.apiToolManagers();
           this.state.apiContactGroups();
@@ -71,8 +75,10 @@ class App extends Component<any, any>{
             route: `ADD${param}`,
             currentSelectedItems: [],
             contactList: undefined,
-            toolManagers: [],
-            contactGroupDetails: undefined
+            toolManagers: undefined,
+            contactGroupDetails: undefined,
+            contactGroups: undefined,
+            groupDetails: undefined,
           })
           this.state.apiToolManagers();
           this.state.apiContactGroups();
@@ -174,18 +180,27 @@ class App extends Component<any, any>{
           }
           // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
         },
-        DELETE: () => (row: any) => {
+        DELETE: (param: any) => (row: any) => {
 
-          this.props.setState({
+          this.setState({
             contactGroups: [],
             groupDetails: [],
             toolManagers: []
           })
-          this.props.post({
-            id: row.id, method: 'DELETE',
-            endpoint: 'apiToolManagers',
+          if (param === "_CONTACT_GROUP") {
+            this.state.post({
+              id: row.id, method: 'DELETE',
+              endpoint: 'apiContactGroups',
 
-          })
+            })
+          }
+          if (param === "_TOOL_MANAGER") {
+            this.state.post({
+              id: row.id, method: 'DELETE',
+              endpoint: 'apiToolManagers',
+
+            })
+          }
           console.log('DELETE')
         }
       },
@@ -486,7 +501,54 @@ class App extends Component<any, any>{
               links={{
                 ...this.state.links,
                 BACK: this.state.links.GROUP_DETAILS,
-                EDIT: this.state.links.GROUP_DETAILS,
+                EDIT: (data: any) => {
+                  console.log('onClick', { data, props: this.props })
+                  this.state.post(
+                    {
+                      id: uuid(),
+                      data: {
+                        id: uuid(),
+                        "name": data["Name"],
+                        "primaryContact": data["Primary Contact"],
+                        "secondaryContact": data["Secondary Contact"],
+                        "ossName": data["OSS Name"],
+                        "ossContact": data["OSS Contact"],
+                        "leader": data["Leader"],
+                        "lastUpdated": new Date(),
+                        "owner": data["Owner"],
+                        "lastUpdatedUser": authContext._user.userName
+                      },
+                      endpoint: 'apiContactGroups',
+                      method: 'POST'
+                    });
+                  //     data: {
+                  //         "id": ADD ? uuid() : data.id,
+                  //         "name": data["Name"],
+                  //         "primaryContact": data["Primary Contact"],
+                  //         "secondaryContact": data["Secondary Contact"],
+                  //         "ossName": data["OSS Name"],
+                  //         "ossContact": data["OSS Contact"],
+                  //         "leader": data["Leader"],
+                  //         "lastUpdated": ADD ? new Date() : data["Last Updated"],
+                  //         "owner": data["Owner"],
+                  //         "lastUpdatedUser": ADD ? authContext._user.userName : data["Last Updated User"],
+                  // }, 
+                  // data: 
+                  //     {
+                  //     }
+                  // ,
+                  // endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
+                  this.setState({
+                    contactGroups: [],
+                    groupDetails: undefined,
+                    toolManagers: undefined,
+                    currentSelectedItems: undefined,
+                    contactList: []
+                  })
+                  // this.props.apiContactGroups()
+                  // this.props.apiToolManagers()
+                  this.state.links.GROUP_DETAILS()
+                }
               }}
               textFields={['Name', 'Primary Contact', 'Secondary Contact', 'Leader', 'OSS Name', 'OSS Contact']}
               CONTACT
@@ -511,8 +573,38 @@ class App extends Component<any, any>{
               links={{
                 ...this.state.links,
                 BACK: this.state.links.GROUP_DETAILS,
-                EDIT: () => {
-                  this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
+                EDIT: (data: any) => {
+
+                  console.log('====POST', { data })
+                  console.log('====POST', { data })
+                  console.log('====POST', { data })
+                  console.log('====POST', { data })
+                  // this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
+                  this.state.post(
+                    {
+                      id: data.id,
+                      data: {
+                        id: data.id,
+                        "name": data["Name"],
+                        "primaryContact": data["Primary Contact"],
+                        "secondaryContact": data["Secondary Contact"],
+                        "ossName": data["OSS Name"],
+                        "ossContact": data["OSS Contact"],
+                        "leader": data["Leader"],
+                        "lastUpdated": data["Last Updated"],
+                        "owner": data["Owner"],
+                        "lastUpdatedUser": data["Last Updated User"]
+                      },
+                      endpoint: 'apiContactGroups',
+                      method: 'PUT'
+                    });
+                  this.setState({
+                    contactGroups: [],
+                    groupDetails: undefined,
+                    toolManagers: undefined,
+                    currentSelectedItems: undefined,
+                    contactList: []
+                  })
                   this.state.links.GROUP_DETAILS();
                 },
               }}
@@ -530,7 +622,7 @@ class App extends Component<any, any>{
                 ...this.state.links,
                 BACK: this.state.links.GROUP_DETAILS,
                 EDIT: () => {
-                  this.state.links.EDIT('_CONTACT_GROUP')();
+                  this.state.links.EDIT('_CONTACT_GROUP')(this.state.contactGroupDetails);
                   this.state.apiContactGroupsIDDisplayName({ id: this.state.contactGroupDetails.id });
                 }
               }}
@@ -556,7 +648,44 @@ class App extends Component<any, any>{
               links={{
                 ...this.state.links,
                 BACK: this.state.links.TOOL_MANAGERS,
-                EDIT: this.state.links.TOOL_MANAGERS
+                EDIT: (data: any) => () => {
+                  console.log('onClick', { data, props: this.props })
+                  this.state.post(
+                    {
+                      id: uuid(),
+                      data: {
+                        "id": uuid(),
+                        "toolManager": data['Tool Manager'],
+                        "addedBy": authContext._user.userName,
+                        "lastUpdated": new Date(),
+                        "lastUpdatedBy": authContext._user.userName
+                      },
+                      endpoint: 'apiToolManagers',
+                      method: 'POST'
+                    });
+                  //     data: {
+                  //         "id": ADD ? uuid() : data.id,
+                  //         "name": data["Name"],
+                  //         "primaryContact": data["Primary Contact"],
+                  //         "secondaryContact": data["Secondary Contact"],
+                  //         "ossName": data["OSS Name"],
+                  //         "ossContact": data["OSS Contact"],
+                  //         "leader": data["Leader"],
+                  //         "lastUpdated": ADD ? new Date() : data["Last Updated"],
+                  //         "owner": data["Owner"],
+                  //         "lastUpdatedUser": ADD ? authContext._user.userName : data["Last Updated User"],
+                  // }, 
+                  // ,
+                  // endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
+                  this.setState({
+                    contactGroups: undefined,
+                    groupDetails: undefined,
+                    toolManagers: undefined
+                  })
+                  // this.props.apiContactGroups()
+                  // this.props.apiToolManagers()
+                  this.state.links.TOOL_MANAGERS();
+                }
               }}
               textFields={[
                 'Tool Manager'
@@ -581,29 +710,6 @@ class App extends Component<any, any>{
               groupDetails={this.state.contactGroupDetails}
               ADD
             />,
-            // route === 'EDIT_TOOL_MANAGER' &&
-            // <Group
-            //   {...this.state}
-            //   title={'View Group'}
-            //   links={{
-            //     ...this.state.links,
-            //     BACK: this.state.links.TOOL_MANAGERS,
-            //     EDIT: () => {
-            //       this.state.links.EDIT('_TOOL_MANAGER')();
-            //       this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
-            //     }
-            //   }}
-            //   textFields={[
-            //     'Tool Manager',
-            //     'Added By',
-            //     'Last Updated',
-            //     'Last Updated By'
-            //   ]}
-            //   groupDetails={this.state.contactGroupDetails}
-            //   viewOnly
-            //   hasGroupDetails
-            //   ADD
-            // />,
             route === 'VIEW_TOOL_MANAGER' &&
             <Group
               {...this.state}
@@ -612,7 +718,7 @@ class App extends Component<any, any>{
                 ...this.state.links,
                 BACK: this.state.links.TOOL_MANAGERS,
                 EDIT: () => {
-                  this.state.links.EDIT('_TOOL_MANAGER')();
+                  this.state.links.EDIT('_TOOL_MANAGER');
                 }
               }}
               textFields={[
@@ -645,12 +751,12 @@ export const endpoints = ({ alias, id, endpoint, contact, thenFunc, method, data
   return adalApiFetch(
     axios,
     ({
-      apiContactGroups: method === 'DELETE' ? `${endpointBaseUrl}/api/ContactGroups/${id}` : `${endpointBaseUrl}/api/ContactGroups/`,
+      apiContactGroups: method === ('PUT' || 'DELETE') ? `${endpointBaseUrl}/api/ContactGroups/${id}` : `${endpointBaseUrl}/api/ContactGroups/`,
       apiContactGroupsIDAlias: `${endpointBaseUrl}/api/ContactGroups/${id}/alias`,
       apiContactGroupsIDDisplayName: `${endpointBaseUrl}/api/ContactGroups/${id}/DisplayName`,
       apiSearchContactsLegal: `${endpointBaseUrl}/api/Search/Contacts/Legal/${contact}`,
       apiSearchUser: `${endpointBaseUrl}/api/Search/Users/${contact}`,
-      apiToolManagers: method === 'DELETE' ? `${endpointBaseUrl}/api/ToolManagers/${id}` : `${endpointBaseUrl}/api/ToolManagers`,
+      apiToolManagers: method === ('PUT' || 'DELETE') ? `${endpointBaseUrl}/api/ToolManagers/${id}` : `${endpointBaseUrl}/api/ToolManagers`,
       apiToolManagersAliasToolManager: `${endpointBaseUrl}/api/ToolManagers/${alias}/ToolManager`,
       apiToolManagersIDAlias: `${endpointBaseUrl}/api/ToolManagers/${id}/alias`,
       apiToolManagersIDDisplayName: `${endpointBaseUrl}/api/ToolManagers/${id}/DisplayName`,

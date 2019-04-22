@@ -372,41 +372,7 @@ export class Group extends React.PureComponent<Props>{
                 }
             })
         }
-        // const onSave = ({ data }: any) => {
-        //     console.log('onClick', { data, props: this.props })
-        //     this.props.post(
-        //         {
-        //             id: ADD ? uuidv1() : data.id,
-        //             data: CONTACT ? {
-        //                 "id": ADD ? uuidv1() : data.id,
-        //                 "name": data["Name"],
-        //                 "primaryContact": data["Primary Contact"],
-        //                 "secondaryContact": data["Secondary Contact"],
-        //                 "ossName": data["OSS Name"],
-        //                 "ossContact": data["OSS Contact"],
-        //                 "leader": data["Leader"],
-        //                 "lastUpdated": ADD ? new Date() : data["Last Updated"],
-        //                 "owner": data["Owner"],
-        //                 "lastUpdatedUser": ADD ? authContext._user.userName : data["Last Updated User"],
-        //             } :
-        //                 {
-        //                     id: ADD ? uuidv1() : data.id,
-        //                     "toolManager": this.props.contactGroupDetails['Tool Manager'],
-        //                     "addedBy": authContext._user.userName,
-        //                     "lastUpdated": new Date(),
-        //                     "lastUpdatedBy": authContext._user.userName
-        //                 }
-        //             ,
-        //             endpoint: CONTACT ? 'apiContactGroups' : 'apiToolManagers', method: ADD ? 'POST' : 'PUT'
-        //         })
-        //     this.props.setState({
-        //         contactGroups: [],
-        //         groupDetails: [],
-        //         toolManagers: []
-        //     })
-        //     // this.props.apiContactGroups()
-        //     // this.props.apiToolManagers()
-        // }
+
         return (
             <div style={{ width: '100%', margin: "auto", display: 'inline-block', textAlign: 'center', marginTop: 50 }}>
                 <h1 style={{ margin: "auto", display: 'inline-block', marginBottom: 20, textAlign: 'center', width: '100%' }}>{title}</h1>
@@ -530,14 +496,7 @@ export class Group extends React.PureComponent<Props>{
                             text={viewOnly ? '' : 'OK'}
                             title={viewOnly ? 'EDIT' : "OK"}
                             ariaLabel={viewOnly ? 'EDIT' : "OK"}
-                            onClick={() => {
-                                console.log('onClick', this.props.contactGroupDetails)
-                                // this.props.post({ id: groupDetails.id, data: groupDetails })
-
-                                // onSave({ data: this.props.contactGroupDetails })
-                                links.EDIT()
-
-                            }}
+                            onClick={() => links.EDIT(this.props.contactGroupDetails)}
                         />
                         <Button
                             styles={{
