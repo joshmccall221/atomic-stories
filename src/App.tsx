@@ -496,7 +496,7 @@ class App extends Component<any, any>{
                         "ossContact": data["OSS Contact"],
                         "leader": data["Leader"],
                         "lastUpdated": new Date(),
-                        "owner": data["Owner"],
+                        "owner": authContext._user.userName,
                         "lastUpdatedUser": authContext._user.userName
                       },
                       endpoint: 'apiContactGroups',
@@ -568,7 +568,7 @@ class App extends Component<any, any>{
                         "ossContact": data["OSS Contact"],
                         "leader": data["Leader"],
                         "lastUpdated": new Date(),
-                        "owner": data["Owner"],
+                        "owner": authContext._user.userName,
                         "lastUpdatedUser": authContext._user.userName
                       },
                       endpoint: 'apiContactGroups',
