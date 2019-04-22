@@ -576,11 +576,6 @@ class App extends Component<any, any>{
                 ...this.state.links,
                 BACK: this.state.links.GROUP_DETAILS,
                 EDIT: (data: any) => {
-
-                  console.log('====POST', { data })
-                  console.log('====POST', { data })
-                  console.log('====POST', { data })
-                  console.log('====POST', { data })
                   // this.state.apiContactGroupsIDAlias({ id: this.state.contactGroupDetails.id });
                   this.state.post(
                     {
