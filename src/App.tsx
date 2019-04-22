@@ -111,22 +111,18 @@ class App extends Component<any, any>{
           if (param === "_CONTACT_GROUP") {
             this.state.apiContactGroupsIDAlias({ id: row.id })
               .then((contactGroupsIDAlias: any) => {
-
-
-                console.log('=====================', { contactGroupsIDAlias });
-                console.log('=====================', { contactGroupsIDAlias });
-                console.log('=====================', { contactGroupsIDAlias: contactGroupsIDAlias });
-
                 [
                   'Primary Contact',
                   'Secondary Contact',
                   'Leader',
                 ].map((m: any) => {
-                  console.log('=====================', { contactGroupsIDAlias, m: contactGroupsIDAlias[m] });
 
                   this.state.apiSearchUsers(contactGroupsIDAlias[m])
                     .then((people: any) => {
-                      const peopleListObject = { ...this.state.peopleListObject, ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m })) }
+                      const peopleListObject = {
+                        ...this.state.peopleListObject,
+                        ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m }))
+                      }
                       const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
                       console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
                       this.setState({
@@ -148,6 +144,32 @@ class App extends Component<any, any>{
 
             // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
 
+            this.state.apiToolManagersIDAlias({ id: row.id })
+              .then((apiToolManagersIDAlias: any) => {
+                [
+                  'Tool Manager',
+                ].map((m: any) => {
+
+                  this.state.apiSearchUsers(apiToolManagersIDAlias.toolManager)
+                    .then((people: any) => {
+                      const peopleListObject = {
+                        ...this.state.peopleListObject,
+                        ...people && people.map((m: { mail: any; }) => ({ [m.mail]: m }))
+                      }
+                      const peopleList = Object.values(peopleListObject).map(m => m[Object.keys(m)[0]]);
+                      console.log('===apiSearchUsers', { peopleListObject, user: authContext._user.profile, peopleList })
+                      this.setState({
+                        peopleListObject,
+                        peopleList,
+                        mostRecentlyUsed: peopleList,
+                        currentSelectedItems: {
+                          ...this.state.currentSelectedItems,
+                          [m]: peopleList
+                        }
+                      });
+                    });
+                })
+              });
 
           }
           // this.state.apiToolManagersIDAlias({ id: this.state.contactGroupDetails.id });
